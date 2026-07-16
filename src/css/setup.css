@@ -1,0 +1,258 @@
+/* ─── Setup Wizard ──────────────────────────────────────────────────────── */
+.setup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 8, 6, 0.95);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn var(--transition-slow) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.setup-modal {
+    width: 520px;
+    max-height: 80vh;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xl);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Setup Step */
+.setup-step {
+    padding: var(--space-3xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    animation: stepFadeIn 300ms ease forwards;
+}
+
+@keyframes stepFadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.setup-step-header {
+    text-align: center;
+}
+
+.setup-step-number {
+    font-size: var(--font-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.setup-step h2 {
+    font-size: var(--font-xl);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: var(--space-sm);
+}
+
+.setup-step p {
+    font-size: var(--font-md);
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+/* Setup form */
+.setup-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.setup-label {
+    font-size: var(--font-sm);
+    font-weight: 500;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.setup-input {
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-base);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-dim);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    transition: border-color var(--transition-fast);
+}
+
+.setup-input:focus {
+    border-color: var(--accent-primary);
+    outline: none;
+}
+
+.setup-input.valid {
+    border-color: var(--green-complete);
+}
+
+.setup-input.invalid {
+    border-color: var(--red-violation);
+}
+
+.validation-status {
+    font-size: var(--font-xs);
+    height: 16px;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.validation-status.valid {
+    color: var(--green-complete);
+}
+
+.validation-status.invalid {
+    color: var(--red-violation);
+}
+
+.validation-status.checking {
+    color: var(--text-tertiary);
+}
+
+/* Blacklist editor */
+.blacklist-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.blacklist-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-sm);
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+.blacklist-tag button {
+    color: var(--text-tertiary);
+    font-size: var(--font-xs);
+    line-height: 1;
+}
+.blacklist-tag button:hover {
+    color: var(--red-violation);
+}
+
+.blacklist-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.blacklist-add-row {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.blacklist-add-row input {
+    flex: 1;
+}
+
+/* Backfill options */
+.backfill-options {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.backfill-option {
+    flex: 1;
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border: 1px solid var(--accent-dim);
+    border-radius: var(--radius-md);
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+}
+
+.backfill-option:hover {
+    border-color: var(--accent-muted);
+}
+
+.backfill-option.selected {
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    background: rgba(196, 149, 106, 0.08);
+}
+
+/* Setup buttons */
+.setup-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+}
+
+.setup-btn {
+    padding: var(--space-sm) var(--space-xl);
+    border-radius: var(--radius-md);
+    font-size: var(--font-md);
+    font-weight: 500;
+    transition: all var(--transition-fast);
+}
+
+.setup-btn.primary {
+    background: var(--accent-primary);
+    color: var(--text-inverse);
+}
+.setup-btn.primary:hover {
+    background: var(--accent-secondary);
+}
+
+.setup-btn.secondary {
+    color: var(--text-secondary);
+}
+.setup-btn.secondary:hover {
+    color: var(--text-primary);
+}
+
+/* Progress dots */
+.setup-progress {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: var(--space-lg);
+}
+
+.progress-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background: var(--accent-dim);
+    transition: all var(--transition-base);
+}
+
+.progress-dot.active {
+    background: var(--accent-primary);
+    width: 24px;
+    border-radius: 4px;
+}
+
+.progress-dot.completed {
+    background: var(--green-complete);
+}

@@ -1,0 +1,191 @@
+/* ─── Day Detail Panel ──────────────────────────────────────────────────── */
+.day-panel {
+    width: var(--panel-width);
+    min-width: var(--panel-width);
+    background: var(--bg-secondary);
+    border-left: 1px solid rgba(255, 255, 255, 0.04);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    animation: slideIn var(--transition-slow) forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-lg) var(--space-xl);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    flex-shrink: 0;
+}
+
+.panel-header h3 {
+    font-size: var(--font-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.panel-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    color: var(--text-tertiary);
+    transition: all var(--transition-fast);
+}
+.panel-close:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.panel-content {
+    padding: var(--space-xl);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+}
+
+/* Habit Section */
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.panel-section-title {
+    font-size: var(--font-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-tertiary);
+}
+
+/* Habit Item */
+.habit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+}
+
+.habit-icon {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-sm);
+}
+
+.habit-icon.completed {
+    background: var(--green-bg);
+    color: var(--green-complete);
+}
+
+.habit-icon.none {
+    background: var(--bg-hover);
+    color: var(--text-tertiary);
+}
+
+.habit-icon.unverified {
+    background: var(--yellow-bg);
+    color: var(--yellow-unverified);
+}
+
+.habit-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.habit-name {
+    font-size: var(--font-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+}
+
+.habit-platform {
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
+    padding: 1px 6px;
+    background: var(--bg-hover);
+    border-radius: 3px;
+    text-transform: capitalize;
+}
+
+.habit-detail {
+    font-size: var(--font-sm);
+    color: var(--text-secondary);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.habit-source {
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
+    margin-top: 2px;
+}
+
+/* Violation Item */
+.violation-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--red-bg);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--red-violation);
+}
+
+.violation-domain {
+    font-size: var(--font-md);
+    font-weight: 500;
+    color: var(--text-primary);
+    flex: 1;
+}
+
+.violation-time {
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
+    white-space: nowrap;
+}
+
+.violation-meta {
+    font-size: var(--font-xs);
+    color: var(--text-tertiary);
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* No data state */
+.empty-state {
+    text-align: center;
+    padding: var(--space-2xl);
+    color: var(--text-tertiary);
+}
+
+.empty-state-icon {
+    font-size: 32px;
+    margin-bottom: var(--space-sm);
+    opacity: 0.5;
+}
+
+.empty-state-text {
+    font-size: var(--font-md);
+}

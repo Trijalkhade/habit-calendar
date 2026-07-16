@@ -1,0 +1,31 @@
+{
+    "manifest_version": 3,
+    "name": "Habit Calendar",
+    "version": "1.0.0",
+    "description": "Tracks coding habit completions and blacklisted site visits for Habit Calendar app",
+    "permissions": ["webNavigation", "storage"],
+    "host_permissions": [
+        "https://leetcode.com/*",
+        "https://takeuforward.in/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": ["https://leetcode.com/*"],
+            "js": ["content/leetcode.js"],
+            "run_at": "document_idle"
+        },
+        {
+            "matches": ["https://takeuforward.in/*", "https://www.takeuforward.in/*"],
+            "js": ["content/takeuforward.js"],
+            "run_at": "document_idle"
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    }
+}
