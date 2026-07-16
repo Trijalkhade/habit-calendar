@@ -2,15 +2,17 @@
 
 const DEFAULT_PORT = 19847;
 let serverPort = DEFAULT_PORT;
+let serverHost = '127.0.0.1';
 let blacklist = [];
 let isConnected = false;
 
 // Discover the daemon's port and load blacklist on startup
 async function init() {
-    // Try to load saved port from storage
+    // Try to load saved config from storage
     try {
-        const data = await chrome.storage.local.get(['serverPort']);
+        const data = await chrome.storage.local.get(['serverPort', 'serverHost']);
         if (data.serverPort) serverPort = data.serverPort;
+        if (data.serverHost) serverHost = data.serverHost;
     } catch (e) { /* use default */ }
 
     // Try to connect and fetch blacklist
@@ -31,9 +33,16 @@ async function init() {
     setInterval(fetchBlacklist, 10 * 60 * 1000);
 }
 
+// Listen for reconnect messages from popup
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    if (msg.action === 'reconnect') {
+        init(); // reload config and reconnect
+    }
+});
+
 async function checkHealth() {
     try {
-        const resp = await fetch(`http://127.0.0.1:${serverPort}/health`, {
+        const resp = await fetch(`http://${serverHost}:${serverPort}/health`, {
             signal: AbortSignal.timeout(3000)
         });
         if (resp.ok) {
@@ -42,13 +51,13 @@ async function checkHealth() {
         }
     } catch (e) { /* offline */ }
 
-    // Try scanning ports if default failed
-    if (!isConnected) {
+    // Try scanning ports if default failed (only on 127.0.0.1)
+    if (!isConnected && serverHost === '127.0.0.1') {
         for (let port = 19840; port <= 19860; port++) {
             if (port === serverPort) continue;
             try {
                 const resp = await fetch(`http://127.0.0.1:${port}/health`, {
-                    signal: AbortSignal.timeout(1000)
+                    signal: AbortSignal.timeout(200)
                 });
                 if (resp.ok) {
                     serverPort = port;
@@ -56,7 +65,7 @@ async function checkHealth() {
                     isConnected = true;
                     return true;
                 }
-            } catch (e) { /* try next */ }
+            } catch (e) { /* ignore */ }
         }
     }
 
@@ -65,13 +74,17 @@ async function checkHealth() {
 }
 
 async function fetchBlacklist() {
-    if (!isConnected) return;
     try {
-        const resp = await fetch(`http://127.0.0.1:${serverPort}/blacklist-domains`);
-        const data = await resp.json();
-        blacklist = data.domains || [];
+        const resp = await fetch(`http://${serverHost}:${serverPort}/blacklist-domains`);
+        if (resp.ok) {
+            const data = await resp.json();
+            blacklist = data.domains || [];
+            chrome.storage.local.set({ blacklistCache: blacklist });
+        }
     } catch (e) {
-        console.error('Failed to fetch blacklist:', e);
+        // Use cached if offline
+        const data = await chrome.storage.local.get(['blacklistCache']);
+        if (data.blacklistCache) blacklist = data.blacklistCache;
     }
 }
 
@@ -88,7 +101,7 @@ async function sendEvent(event) {
     }
 
     try {
-        await fetch(`http://127.0.0.1:${serverPort}/event`, {
+        await fetch(`http://${serverHost}:${serverPort}/event`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(event),
@@ -102,7 +115,7 @@ async function sendBlacklistVisit(domain, url) {
     if (!isConnected) return;
 
     try {
-        await fetch(`http://127.0.0.1:${serverPort}/blacklist-check`, {
+        await fetch(`http://${serverHost}:${serverPort}/blacklist-check`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

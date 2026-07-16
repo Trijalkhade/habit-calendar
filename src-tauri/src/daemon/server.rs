@@ -58,8 +58,8 @@ pub async fn start_server(db: Arc<Mutex<Connection>>, port: u16) -> Result<(), B
         .layer(CorsLayer::permissive())
         .with_state(state);
 
-    let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{}", port)).await?;
-    info!("Extension server listening on 127.0.0.1:{}", port);
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
+    info!("Extension server listening on 0.0.0.0:{}", port);
     axum::serve(listener, app).await?;
 
     Ok(())

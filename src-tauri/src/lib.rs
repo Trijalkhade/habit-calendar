@@ -69,10 +69,15 @@ fn get_diagnostics(state: tauri::State<'_, AppState>) -> DiagnosticsInfo {
     let conn = state.db.lock().unwrap();
     let sync_statuses = queries::get_sync_statuses(&conn);
     let server_port = state.server_port;
+    let local_ip = local_ip_address::local_ip()
+        .map(|ip| ip.to_string())
+        .unwrap_or_else(|_| "127.0.0.1".to_string());
+        
     DiagnosticsInfo {
         sync_statuses,
         server_port,
         db_path: db::get_db_path().to_string_lossy().to_string(),
+        local_ip,
     }
 }
 
@@ -98,12 +103,7 @@ async fn run_backfill(state: tauri::State<'_, AppState>, platform: String, month
 
 #[tauri::command]
 async fn reset_and_backfill(state: tauri::State<'_, AppState>) -> Result<String, String> {
-    // Step 1: Reset all data and re-seed habits
-    {
-        let conn = state.db.lock().unwrap();
-        db::schema::reset_data(&conn).map_err(|e| e.to_string())?;
-    }
-    info!("Database reset complete, re-seeded with 6 habits");
+    info!("Starting backfill process without dropping existing data");
 
     // Step 2: Backfill LeetCode data (6 months)
     let db = state.db.clone();
@@ -165,6 +165,7 @@ pub struct DiagnosticsInfo {
     pub sync_statuses: Vec<queries::SyncStatus>,
     pub server_port: u16,
     pub db_path: String,
+    pub local_ip: String,
 }
 
 // ─── App Entry Point ─────────────────────────────────────────────────────────
@@ -234,8 +235,17 @@ pub fn run() {
             reset_and_backfill,
             validate_username,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::Reopen { .. } = event {
+                use tauri::Manager;
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                }
+            }
+        });
 }
 
 fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {

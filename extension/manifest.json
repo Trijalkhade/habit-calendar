@@ -6,7 +6,8 @@
     "permissions": ["webNavigation", "storage"],
     "host_permissions": [
         "https://leetcode.com/*",
-        "https://takeuforward.in/*"
+        "https://takeuforward.in/*",
+        "https://takeuforward.org/*"
     ],
     "content_scripts": [
         {
@@ -15,13 +16,22 @@
             "run_at": "document_idle"
         },
         {
-            "matches": ["https://takeuforward.in/*", "https://www.takeuforward.in/*"],
+            "matches": [
+                "https://takeuforward.in/*", 
+                "https://www.takeuforward.in/*",
+                "https://takeuforward.org/*",
+                "https://www.takeuforward.org/*"
+            ],
             "js": ["content/takeuforward.js"],
             "run_at": "document_idle"
         }
     ],
     "background": {
         "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Habit Calendar Sync"
     },
     "icons": {
         "16": "icons/icon16.png",

@@ -322,7 +322,7 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     dataSection.innerHTML = `
         <div class="settings-section-title">Data Management</div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="settings-action-btn" onclick="triggerResetAndBackfill()" id="btn-reset-backfill">Reset & Backfill (6 months)</button>
+            <button class="settings-action-btn" onclick="triggerResetAndBackfill()" id="btn-reset-backfill">Force Sync (Backfill)</button>
         </div>
         <div id="reset-status" style="font-size: 12px; color: var(--text-tertiary); margin-top: 8px;"></div>
     `;
@@ -355,8 +355,10 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
 
     // Server port info
     const portInfo = document.createElement('div');
-    portInfo.style.cssText = 'font-size: 11px; color: var(--text-tertiary); margin-top: 12px;';
-    portInfo.textContent = `Extension server: 127.0.0.1:${diagnostics.server_port} · DB: ${diagnostics.db_path}`;
+    portInfo.style.cssText = 'font-size: 11px; color: var(--text-tertiary); margin-top: 12px; line-height: 1.5;';
+    portInfo.innerHTML = `Extension server: 127.0.0.1:${diagnostics.server_port}<br>
+    Local Wi-Fi IP (for Mobile Sync): <strong style="color: var(--text-primary)">${diagnostics.local_ip}:${diagnostics.server_port}</strong><br>
+    DB: ${diagnostics.db_path}`;
     diagSection.appendChild(portInfo);
 
     container.appendChild(diagSection);

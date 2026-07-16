@@ -78,20 +78,63 @@
         return document.title || 'TUF Module';
     }
 
-    // Also listen for click events on completion buttons
+    // --- Fallback: Network Request Interception ---
+    // Inject a script into the page context to intercept fetch requests
+    // This is much more reliable than DOM scraping for React/Next.js apps
+    const script = document.createElement('script');
+    script.textContent = `
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const response = await originalFetch.apply(this, args);
+            try {
+                const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+                const method = (args[1]?.method || 'GET').toUpperCase();
+                
+                // If it's a POST/PUT request to a progress/completion endpoint
+                if (method !== 'GET' && (url.includes('progress') || url.includes('complete') || url.includes('solve') || url.includes('mark') || url.includes('status') || url.includes('update'))) {
+                    window.postMessage({ type: 'TUF_API_CALL', url: url }, '*');
+                }
+            } catch(e) {}
+            return response;
+        };
+    `;
+    document.documentElement.appendChild(script);
+    script.remove();
+
+    window.addEventListener('message', (event) => {
+        if (event.source !== window || !event.data || event.data.type !== 'TUF_API_CALL') return;
+        
+        console.log('[Habit Calendar] TUF progress network request detected:', event.data.url);
+        
+        const key = `tuf-api-${Date.now()}`;
+        if (key !== lastDetected) {
+            lastDetected = key;
+            chrome.runtime.sendMessage({
+                type: 'tuf_complete',
+                title: document.title || 'TakeUForward Module',
+                url: window.location.href,
+            });
+        }
+    });
+
+    // --- Fallback 1: Broad Click Listener ---
     document.addEventListener('click', (e) => {
-        const target = e.target.closest('input[type="checkbox"], button[class*="mark"], [class*="complete"]');
+        // Broaden click targets to catch any checkmark icon, switch, checkbox, or button
+        const target = e.target.closest('input[type="checkbox"], button, svg, [role="button"], [class*="check"], [class*="mark"], [class*="complete"], [class*="status"]');
         if (target) {
             // Small delay to let the DOM update
             setTimeout(() => checkForCompletion(target), 500);
+            
+            // Just in case it's a global state change, check the whole body
+            setTimeout(() => checkForCompletion(document.body), 1000);
         }
     }, true);
 
-    // Start observing
+    // Start observing DOM changes for standard completion classes
     observer.observe(document.body, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ['class', 'checked', 'data-completed'],
+        attributeFilter: ['class', 'checked', 'data-completed', 'data-state'],
     });
 })();
