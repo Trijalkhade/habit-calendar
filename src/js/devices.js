@@ -51,8 +51,8 @@ function renderDevicesPanel(container, devices) {
                     </div>
                 </div>
                 <div class="device-actions">
-                    <button class="device-action-btn" onclick="syncSingleDevice('${device.id}', this)">Sync Now</button>
-                    <button class="device-action-btn danger" onclick="removeDeviceConfirm('${device.id}', '${device.name}')">Remove</button>
+                    <button class="device-action-btn" data-action="syncSingleDevice" data-id="${device.id}">Sync Now</button>
+                    <button class="device-action-btn danger" data-action="removeDeviceConfirm" data-id="${device.id}" data-name="${device.name}">Remove</button>
                 </div>
             `;
             list.appendChild(card);
@@ -80,7 +80,7 @@ function renderDevicesPanel(container, devices) {
         <div class="form-row">
             <input type="text" id="device-ip-input" placeholder="Device IP (e.g., 192.168.1.42)">
             <input type="text" id="device-name-input" placeholder="Name (e.g., My Phone)" style="max-width: 160px;">
-            <button class="add-device-btn" onclick="addNewDevice()" id="btn-add-device">Connect</button>
+            <button class="add-device-btn" data-action="addNewDevice" id="btn-add-device">Connect</button>
         </div>
         <div id="add-device-status" style="font-size: 12px; color: var(--text-tertiary);"></div>
     `;
@@ -180,3 +180,20 @@ function getDeviceIcon(name) {
     if (lower.includes('pixel') || lower.includes('samsung') || lower.includes('android')) return '🤖';
     return '📱';
 }
+
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.getAttribute('data-action');
+    if (action === 'addNewDevice') addNewDevice();
+    if (action === 'syncSingleDevice') {
+        const id = target.getAttribute('data-id');
+        syncSingleDevice(id, target);
+    }
+    if (action === 'removeDeviceConfirm') {
+        const id = target.getAttribute('data-id');
+        const name = target.getAttribute('data-name');
+        removeDeviceConfirm(id, name);
+    }
+});

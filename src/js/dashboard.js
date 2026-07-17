@@ -271,21 +271,21 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     container.innerHTML = '';
 
     // Usernames section
-    const usernameSection = document.createElement('div');
-    usernameSection.className = 'settings-section';
-    usernameSection.innerHTML = `
-        <div class="settings-section-title">Platform Usernames</div>
+    const usernamesSection = document.createElement('div');
+    usernamesSection.className = 'settings-section';
+    usernamesSection.innerHTML = `
+        <div class="settings-section-title">Profiles</div>
         <div class="settings-row">
             <label>LeetCode</label>
-            <input type="text" id="settings-lc" value="${lcUsername}" placeholder="Username">
+            <input type="text" id="settings-leetcode" value="${diagnostics.leetcode_username || ''}">
         </div>
         <div class="settings-row">
             <label>CodeChef</label>
-            <input type="text" id="settings-cc" value="${ccUsername}" placeholder="Username">
+            <input type="text" id="settings-codechef" value="${diagnostics.codechef_username || ''}">
         </div>
-        <button class="settings-save-btn" onclick="saveUsernames()">Save</button>
+        <button class="settings-save-btn" data-action="saveUsernames">Save</button>
     `;
-    container.appendChild(usernameSection);
+    container.appendChild(usernamesSection);
 
     // Blacklist section
     const blacklistSection = document.createElement('div');
@@ -302,7 +302,7 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     blacklist.forEach(entry => {
         const tag = document.createElement('span');
         tag.className = 'blacklist-tag';
-        tag.innerHTML = `${entry.domain} <button onclick="removeBlacklistEntry(${entry.id})">×</button>`;
+        tag.innerHTML = `${entry.domain} <button data-action="removeBlacklistEntry" data-id="${entry.id}">×</button>`;
         tags.appendChild(tag);
     });
     blacklistSection.appendChild(tags);
@@ -310,8 +310,8 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     const addRow = document.createElement('div');
     addRow.className = 'blacklist-add-row';
     addRow.innerHTML = `
-        <input type="text" class="setup-input" id="settings-bl-input" placeholder="Add domain">
-        <button class="setup-btn primary" onclick="addSettingsBlacklist()" style="padding: 8px 16px;">Add</button>
+        <input type="text" class="setup-input" id="settings-blacklist-input" placeholder="Add domain">
+        <button class="setup-btn primary" data-action="addSettingsBlacklist" style="padding: 8px 16px;">Add</button>
     `;
     blacklistSection.appendChild(addRow);
     container.appendChild(blacklistSection);
@@ -327,7 +327,7 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
                 <div style="font-size: 11px; color: var(--text-tertiary);">Start Habit Calendar automatically when you log in</div>
             </div>
             <label class="toggle-switch">
-                <input type="checkbox" id="autostart-toggle" onchange="toggleAutostart(this.checked)">
+                <input type="checkbox" id="autostart-toggle" data-action="toggleAutostart">
                 <span class="toggle-slider"></span>
             </label>
         </div>
@@ -362,7 +362,7 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     dataSection.innerHTML = `
         <div class="settings-section-title">Data Management</div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="settings-action-btn" onclick="triggerResetAndBackfill()" id="btn-reset-backfill">Force Sync (Backfill)</button>
+            <button class="settings-action-btn" data-action="triggerResetAndBackfill" id="btn-reset-backfill">Force Sync (Backfill)</button>
         </div>
         <div id="reset-status" style="font-size: 12px; color: var(--text-tertiary); margin-top: 8px;"></div>
     `;
@@ -500,3 +500,25 @@ async function toggleAutostart(enabled) {
     }
 }
 
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.getAttribute('data-action');
+    if (action === 'saveUsernames') saveUsernames();
+    if (action === 'addSettingsBlacklist') addSettingsBlacklist();
+    if (action === 'triggerResetAndBackfill') triggerResetAndBackfill();
+    if (action === 'removeBlacklistEntry') {
+        const id = parseInt(target.getAttribute('data-id'), 10);
+        removeBlacklistEntry(id);
+    }
+});
+
+document.addEventListener('change', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+    
+    if (target.getAttribute('data-action') === 'toggleAutostart') {
+        toggleAutostart(target.checked);
+    }
+});

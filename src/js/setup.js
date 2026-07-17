@@ -50,7 +50,7 @@ function renderSetupStep() {
                 </div>
                 <div class="setup-actions">
                     <div></div>
-                    <button class="setup-btn primary" onclick="nextSetupStep()">Get Started</button>
+                    <button class="setup-btn primary" data-action="nextSetupStep">Get Started</button>
                 </div>
             `;
             break;
@@ -75,8 +75,8 @@ function renderSetupStep() {
                     <div class="validation-status" id="cc-validation"></div>
                 </div>
                 <div class="setup-actions">
-                    <button class="setup-btn secondary" onclick="prevSetupStep()">Back</button>
-                    <button class="setup-btn primary" onclick="validateAndNext()">Continue</button>
+                    <button class="setup-btn secondary" data-action="prevSetupStep">Back</button>
+                    <button class="setup-btn primary" data-action="validateAndNext">Continue</button>
                 </div>
             `;
 
@@ -99,11 +99,11 @@ function renderSetupStep() {
                 <div class="blacklist-tags" id="setup-blacklist-tags"></div>
                 <div class="blacklist-add-row">
                     <input type="text" class="setup-input" id="setup-blacklist-input" placeholder="Add domain (e.g., pinterest.com)">
-                    <button class="setup-btn primary" onclick="addBlacklistDomain()" style="padding: 8px 16px;">Add</button>
+                    <button class="setup-btn primary" data-action="addBlacklistDomain" style="padding: 8px 16px;">Add</button>
                 </div>
                 <div class="setup-actions">
-                    <button class="setup-btn secondary" onclick="prevSetupStep()">Back</button>
-                    <button class="setup-btn primary" onclick="nextSetupStep()">Continue</button>
+                    <button class="setup-btn secondary" data-action="prevSetupStep">Back</button>
+                    <button class="setup-btn primary" data-action="nextSetupStep">Continue</button>
                 </div>
             `;
 
@@ -126,26 +126,26 @@ function renderSetupStep() {
                     <p>Optionally pull your past submission history to pre-populate the calendar.</p>
                 </div>
                 <div class="backfill-options">
-                    <div class="backfill-option ${setupData.backfillMonths === 0 ? 'selected' : ''}" onclick="selectBackfill(0)">
+                    <div class="backfill-option ${setupData.backfillMonths === 0 ? 'selected' : ''}" data-action="selectBackfill" data-value="0">
                         <div style="font-weight: 600;">None</div>
                         <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Start fresh</div>
                     </div>
-                    <div class="backfill-option ${setupData.backfillMonths === 6 ? 'selected' : ''}" onclick="selectBackfill(6)">
+                    <div class="backfill-option ${setupData.backfillMonths === 6 ? 'selected' : ''}" data-action="selectBackfill" data-value="6">
                         <div style="font-weight: 600;">6 Months</div>
                         <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Recent history</div>
                     </div>
-                    <div class="backfill-option ${setupData.backfillMonths === 12 ? 'selected' : ''}" onclick="selectBackfill(12)">
+                    <div class="backfill-option ${setupData.backfillMonths === 12 ? 'selected' : ''}" data-action="selectBackfill" data-value="12">
                         <div style="font-weight: 600;">1 Year</div>
                         <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Past year</div>
                     </div>
-                    <div class="backfill-option ${setupData.backfillMonths === 24 ? 'selected' : ''}" onclick="selectBackfill(24)">
+                    <div class="backfill-option ${setupData.backfillMonths === 24 ? 'selected' : ''}" data-action="selectBackfill" data-value="24">
                         <div style="font-weight: 600;">2 Years</div>
                         <div style="font-size: 11px; color: var(--text-tertiary); margin-top: 4px;">Maximum</div>
                     </div>
                 </div>
                 <div class="setup-actions">
-                    <button class="setup-btn secondary" onclick="prevSetupStep()">Back</button>
-                    <button class="setup-btn primary" onclick="nextSetupStep()">Continue</button>
+                    <button class="setup-btn secondary" data-action="prevSetupStep">Back</button>
+                    <button class="setup-btn primary" data-action="nextSetupStep">Continue</button>
                 </div>
             `;
             break;
@@ -174,8 +174,8 @@ function renderSetupStep() {
                     You can do this later from Settings. The app works without the extension too.
                 </div>
                 <div class="setup-actions">
-                    <button class="setup-btn secondary" onclick="prevSetupStep()">Back</button>
-                    <button class="setup-btn primary" onclick="finishSetup()">Finish Setup</button>
+                    <button class="setup-btn secondary" data-action="prevSetupStep">Back</button>
+                    <button class="setup-btn primary" data-action="finishSetup">Finish Setup</button>
                 </div>
             `;
             break;
@@ -259,7 +259,7 @@ function renderBlacklistTags() {
     setupData.blacklistDomains.forEach((domain, i) => {
         const tag = document.createElement('span');
         tag.className = 'blacklist-tag';
-        tag.innerHTML = `${domain} <button onclick="removeSetupBlacklist(${i})">×</button>`;
+        tag.innerHTML = `${domain} <button data-action="removeSetupBlacklist" data-index="${i}">×</button>`;
         container.appendChild(tag);
     });
 }
@@ -328,3 +328,24 @@ async function finishSetup() {
         initApp();
     }
 }
+
+// Global click handler for setup wizard to replace inline onclick
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('[data-action]');
+    if (!target) return;
+
+    const action = target.getAttribute('data-action');
+    if (action === 'nextSetupStep') nextSetupStep();
+    if (action === 'prevSetupStep') prevSetupStep();
+    if (action === 'validateAndNext') validateAndNext();
+    if (action === 'addBlacklistDomain') addBlacklistDomain();
+    if (action === 'finishSetup') finishSetup();
+    if (action === 'selectBackfill') {
+        const val = parseInt(target.getAttribute('data-value'), 10);
+        selectBackfill(val);
+    }
+    if (action === 'removeSetupBlacklist') {
+        const idx = parseInt(target.getAttribute('data-index'), 10);
+        removeSetupBlacklist(idx);
+    }
+});
