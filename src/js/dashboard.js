@@ -316,6 +316,46 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     blacklistSection.appendChild(addRow);
     container.appendChild(blacklistSection);
 
+    // Autostart section
+    const autostartSection = document.createElement('div');
+    autostartSection.className = 'settings-section';
+    autostartSection.innerHTML = `
+        <div class="settings-section-title">Startup</div>
+        <div class="settings-row" style="justify-content: space-between; align-items: center;">
+            <div>
+                <label style="margin-bottom: 2px;">Launch on login</label>
+                <div style="font-size: 11px; color: var(--text-tertiary);">Start Habit Calendar automatically when you log in</div>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="autostart-toggle" onchange="toggleAutostart(this.checked)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    `;
+    container.appendChild(autostartSection);
+
+    // Check autostart status asynchronously
+    invoke('plugin:autostart|is_enabled').then(enabled => {
+        const toggle = document.getElementById('autostart-toggle');
+        if (toggle) toggle.checked = enabled;
+    }).catch(() => {});
+
+    // Full Disk Access check (macOS only)
+    invoke('check_full_disk_access').then(hasAccess => {
+        if (!hasAccess) {
+            const fdaWarning = document.createElement('div');
+            fdaWarning.className = 'settings-section';
+            fdaWarning.innerHTML = `
+                <div class="settings-section-title" style="color: var(--red-violation);">⚠ Full Disk Access Required</div>
+                <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
+                    Habit Calendar needs Full Disk Access to scan browser history for blacklisted sites.<br>
+                    <strong>Go to:</strong> System Settings → Privacy & Security → Full Disk Access → Enable "Habit Calendar"
+                </div>
+            `;
+            container.insertBefore(fdaWarning, container.firstChild);
+        }
+    }).catch(() => {});
+
     // Data Management section
     const dataSection = document.createElement('div');
     dataSection.className = 'settings-section';
@@ -444,3 +484,19 @@ function formatRelativeTime(timestamp) {
         return timestamp;
     }
 }
+
+async function toggleAutostart(enabled) {
+    try {
+        if (enabled) {
+            await invoke('plugin:autostart|enable');
+        } else {
+            await invoke('plugin:autostart|disable');
+        }
+    } catch (e) {
+        console.error('Autostart toggle failed:', e);
+        // Revert the checkbox
+        const toggle = document.getElementById('autostart-toggle');
+        if (toggle) toggle.checked = !enabled;
+    }
+}
+

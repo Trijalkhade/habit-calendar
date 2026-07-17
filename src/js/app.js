@@ -36,7 +36,24 @@ async function initApp() {
     renderMiniCalendar();
     updateHeaderLabel();
 
-    // Refresh data every 5 minutes
+    // Listen for real-time data updates from the daemon (instant UI refresh)
+    try {
+        const { listen } = window.__TAURI__.event;
+        let refreshTimeout = null;
+        await listen('data-updated', async (event) => {
+            // Debounce: max 1 refresh per 2 seconds during bulk imports
+            if (refreshTimeout) clearTimeout(refreshTimeout);
+            refreshTimeout = setTimeout(async () => {
+                await loadMonthData();
+                renderCalendar();
+                renderMiniCalendar();
+            }, 2000);
+        });
+    } catch (e) {
+        console.warn('Could not set up event listener:', e);
+    }
+
+    // Refresh data every 5 minutes as fallback
     setInterval(async () => {
         await loadMonthData();
         renderCalendar();
@@ -139,11 +156,17 @@ function bindOverlays() {
         document.getElementById('settings-overlay').classList.add('hidden');
     });
 
+    // Devices
+    document.getElementById('btn-devices').addEventListener('click', openDevicesPanel);
+    document.getElementById('devices-close').addEventListener('click', () => {
+        document.getElementById('devices-overlay').classList.add('hidden');
+    });
+
     // Day panel close
     document.getElementById('panel-close').addEventListener('click', closeDayPanel);
 
     // Close overlays on backdrop click
-    ['dashboard-overlay', 'settings-overlay'].forEach(id => {
+    ['dashboard-overlay', 'settings-overlay', 'devices-overlay'].forEach(id => {
         document.getElementById(id).addEventListener('click', (e) => {
             if (e.target.id === id) e.target.classList.add('hidden');
         });
@@ -154,6 +177,7 @@ function closeAllPanels() {
     closeDayPanel();
     document.getElementById('dashboard-overlay').classList.add('hidden');
     document.getElementById('settings-overlay').classList.add('hidden');
+    document.getElementById('devices-overlay').classList.add('hidden');
 }
 
 function closeDayPanel() {

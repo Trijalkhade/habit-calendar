@@ -153,6 +153,55 @@ async fn validate_username(platform: String, username: String) -> Result<bool, S
     }
 }
 
+// ─── Device Management Commands ──────────────────────────────────────────────
+
+#[tauri::command]
+async fn add_device(state: tauri::State<'_, AppState>, ip: String, name: String) -> Result<String, String> {
+    let db = state.db.clone();
+    let port = 19848u16;
+    daemon::devices::add_device(&db, &ip, &name, port)
+        .await
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn get_devices(state: tauri::State<'_, AppState>) -> Vec<daemon::devices::ConnectedDevice> {
+    let conn = state.db.lock().unwrap();
+    queries::get_connected_devices(&conn)
+}
+
+#[tauri::command]
+async fn sync_device(state: tauri::State<'_, AppState>, device_id: String) -> Result<String, String> {
+    let db = state.db.clone();
+    daemon::devices::sync_all_devices(&db)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(format!("Sync complete for device {}", device_id))
+}
+
+#[tauri::command]
+fn remove_device(state: tauri::State<'_, AppState>, device_id: String) -> bool {
+    let conn = state.db.lock().unwrap();
+    queries::remove_connected_device(&conn, &device_id).is_ok()
+}
+
+#[tauri::command]
+fn check_full_disk_access() -> bool {
+    // On macOS, try to read Chrome's history file as a permission check
+    #[cfg(target_os = "macos")]
+    {
+        if let Some(home) = dirs::home_dir() {
+            let chrome_history = home.join("Library/Application Support/Google/Chrome/Default/History");
+            if chrome_history.exists() {
+                return std::fs::metadata(&chrome_history)
+                    .map(|m| m.len() > 0)
+                    .unwrap_or(false);
+            }
+        }
+    }
+    true // Non-macOS platforms don't need this check
+}
+
 // ─── App State ───────────────────────────────────────────────────────────────
 
 pub struct AppState {
@@ -203,11 +252,18 @@ pub fn run() {
             // Set up system tray
             setup_tray(app.handle())?;
 
-            // Start daemon in background
+            // Show the main window (it starts hidden for tray-only autostart)
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.show();
+                let _ = window.set_focus();
+            }
+
+            // Start daemon in background with app handle for event emission
             let daemon_db = daemon_db.clone();
             let port = server_port;
+            let app_handle = app.handle().clone();
             tauri::async_runtime::spawn(async move {
-                daemon::start_daemon(daemon_db, port).await;
+                daemon::start_daemon(daemon_db, port, app_handle).await;
             });
 
             info!("Habit Calendar started. Extension server on port {}", server_port);
@@ -234,6 +290,11 @@ pub fn run() {
             run_backfill,
             reset_and_backfill,
             validate_username,
+            add_device,
+            get_devices,
+            sync_device,
+            remove_device,
+            check_full_disk_access,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
@@ -294,8 +355,16 @@ fn setup_tray(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn find_available_port() -> Option<u16> {
+    // Try the default port first, then scan the known range that
+    // the browser extension also scans (19840..=19860).
+    for port in std::iter::once(19847u16).chain(19840u16..=19860) {
+        if std::net::TcpListener::bind(format!("127.0.0.1:{}", port)).is_ok() {
+            return Some(port);
+        }
+    }
+    // Absolute fallback to OS-assigned ephemeral port
     std::net::TcpListener::bind("127.0.0.1:0")
         .ok()
-        .and_then(|listener| listener.local_addr().ok())
-        .map(|addr| addr.port())
+        .and_then(|l| l.local_addr().ok())
+        .map(|a| a.port())
 }

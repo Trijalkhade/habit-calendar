@@ -1,8 +1,9 @@
 use rusqlite::Connection;
+use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
-use log::{info, warn, error};
+use log::{info, warn};
 
 use crate::db::queries;
 
@@ -34,6 +35,21 @@ fn get_browser_paths() -> Vec<(String, String, PathBuf)> {
         if let Some(roaming) = dirs::config_dir() {
             add_firefox_profiles(&roaming.join("Mozilla/Firefox"), &mut paths);
         }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        let config = home.join(".config");
+        // Chrome
+        add_profiles(&config.join("google-chrome"), "chrome", &mut paths);
+        // Brave
+        add_profiles(&config.join("BraveSoftware/Brave-Browser"), "brave", &mut paths);
+        // Edge
+        add_profiles(&config.join("microsoft-edge"), "edge", &mut paths);
+        // Chromium
+        add_profiles(&config.join("chromium"), "chromium", &mut paths);
+        // Firefox
+        add_firefox_profiles(&home.join(".mozilla/firefox"), &mut paths);
     }
 
     paths
@@ -84,12 +100,14 @@ fn add_firefox_profiles(firefox_dir: &PathBuf, paths: &mut Vec<(String, String, 
 }
 
 /// Scan browser history databases for blacklisted domain visits
-pub fn scan_browser_history(db: &Arc<Mutex<Connection>>) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+/// `max_days` controls how far back to scan (7 for regular, larger for catch-up)
+pub fn scan_browser_history(db: &Arc<Mutex<Connection>>, max_days: i32) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let start = Instant::now();
 
-    let blacklist = {
+    // Use HashSet for O(1) blacklist lookups instead of O(n) linear scan
+    let blacklist: HashSet<String> = {
         let conn = db.lock().unwrap();
-        queries::get_blacklist_domains(&conn)
+        queries::get_blacklist_domains(&conn).into_iter().collect()
     };
 
     if blacklist.is_empty() {
@@ -101,7 +119,7 @@ pub fn scan_browser_history(db: &Arc<Mutex<Connection>>) -> Result<(), Box<dyn s
     let mut total_violations = 0;
 
     for (browser, profile, history_path) in &browser_paths {
-        match scan_single_browser(db, browser, profile, history_path, &blacklist) {
+        match scan_single_browser(db, browser, profile, history_path, &blacklist, max_days) {
             Ok(count) => {
                 total_violations += count;
                 if count > 0 {
@@ -120,20 +138,21 @@ pub fn scan_browser_history(db: &Arc<Mutex<Connection>>) -> Result<(), Box<dyn s
         &conn,
         "history_scan",
         "success",
-        Some(&format!("Scanned {} browsers, found {} violations", browser_paths.len(), total_violations)),
+        Some(&format!("Scanned {} browsers ({}d window), found {} violations", browser_paths.len(), max_days, total_violations)),
         Some(duration),
     )?;
 
     Ok(())
 }
 
-/// Scan a single browser's history database
+/// Scan a single browser's history database using cursor-based incremental scanning
 fn scan_single_browser(
     db: &Arc<Mutex<Connection>>,
     browser: &str,
     profile: &str,
     history_path: &PathBuf,
-    blacklist: &[String],
+    blacklist: &HashSet<String>,
+    max_days: i32,
 ) -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
     // Copy the database file to a temp location to avoid lock conflicts
     let temp_dir = std::env::temp_dir().join("habit-calendar-history");
@@ -147,38 +166,46 @@ fn scan_single_browser(
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
     )?;
 
-    // Get the timestamp for "today at midnight" in the browser's format
-    let today = chrono::Local::now().format("%Y-%m-%d").to_string();
-
-    // Chromium stores timestamps as microseconds since 1601-01-01
-    // Firefox stores timestamps as microseconds since 1970-01-01
     let is_firefox = browser == "firefox";
 
+    // Get the scan cursor (last processed visit timestamp) for incremental scanning
+    let cursor = {
+        let conn = db.lock().unwrap();
+        queries::get_scan_cursor(&conn, browser, profile)
+    };
+
+    // Query only entries newer than our cursor for efficiency
     let query = if is_firefox {
-        "SELECT url, last_visit_date FROM moz_places WHERE last_visit_date IS NOT NULL ORDER BY last_visit_date DESC LIMIT 500"
+        "SELECT url, last_visit_date FROM moz_places WHERE last_visit_date IS NOT NULL AND last_visit_date > ? ORDER BY last_visit_date DESC LIMIT 2000"
     } else {
-        "SELECT url, last_visit_time FROM urls WHERE last_visit_time > 0 ORDER BY last_visit_time DESC LIMIT 500"
+        "SELECT url, last_visit_time FROM urls WHERE last_visit_time > ? ORDER BY last_visit_time DESC LIMIT 2000"
     };
 
     let mut stmt = hist_conn.prepare(query)?;
     let mut violations_count = 0;
+    let mut max_visit_time: i64 = cursor;
 
-    let rows = stmt.query_map([], |row| {
+    // Collect all violations first, then batch-insert in a transaction
+    let mut pending_violations: Vec<(String, String, String, String)> = Vec::new();
+
+    let rows = stmt.query_map([cursor], |row| {
         let url: String = row.get(0)?;
         let timestamp: i64 = row.get(1)?;
         Ok((url, timestamp))
     })?;
 
-    let conn = db.lock().unwrap();
-
     for row in rows {
         if let Ok((url, timestamp)) = row {
+            // Track the highest timestamp we've seen for cursor update
+            if timestamp > max_visit_time {
+                max_visit_time = timestamp;
+            }
+
             // Extract domain from URL
             if let Some(domain) = extract_domain(&url) {
-                // Check if domain is in blacklist
-                let is_blacklisted = blacklist.iter().any(|bl| {
-                    domain == *bl || domain.ends_with(&format!(".{}", bl))
-                });
+                // O(1) HashSet lookup instead of O(n) linear scan
+                let is_blacklisted = blacklist.contains(&domain)
+                    || blacklist.iter().any(|bl| domain.ends_with(&format!(".{}", bl)));
 
                 if is_blacklisted {
                     // Convert timestamp to ISO format
@@ -196,35 +223,54 @@ fn scan_single_browser(
                     };
 
                     if !visit_time.is_empty() {
-                        let visit_date = &visit_time[..10]; // Extract YYYY-MM-DD
+                        let visit_date = visit_time[..10].to_string(); // Extract YYYY-MM-DD
 
-                        // Only log visits from recent days (not ancient history)
+                        // Only log visits within the configured window
                         let days_ago = chrono::Local::now()
                             .date_naive()
                             .signed_duration_since(
-                                chrono::NaiveDate::parse_from_str(visit_date, "%Y-%m-%d")
+                                chrono::NaiveDate::parse_from_str(&visit_date, "%Y-%m-%d")
                                     .unwrap_or(chrono::Local::now().date_naive()),
                             )
                             .num_days();
 
-                        if days_ago <= 7 {
-                            let _ = queries::insert_violation(
-                                &conn,
-                                &domain,
-                                Some(&url),
-                                &visit_time,
+                        if days_ago <= max_days as i64 {
+                            pending_violations.push((
+                                domain,
+                                url.clone(),
+                                visit_time,
                                 visit_date,
-                                Some(browser),
-                                Some(profile),
-                                "desktop",
-                                "history_scan",
-                            );
+                            ));
                             violations_count += 1;
                         }
                     }
                 }
             }
         }
+    }
+
+    // Batch-insert all violations in a single lock acquisition
+    if !pending_violations.is_empty() {
+        let conn = db.lock().unwrap();
+        for (domain, url, visit_time, visit_date) in &pending_violations {
+            let _ = queries::insert_violation(
+                &conn,
+                domain,
+                Some(url),
+                visit_time,
+                visit_date,
+                Some(browser),
+                Some(profile),
+                "desktop",
+                "history_scan",
+            );
+        }
+    }
+
+    // Update the scan cursor so next scan only processes new entries
+    if max_visit_time > cursor {
+        let conn = db.lock().unwrap();
+        let _ = queries::set_scan_cursor(&conn, browser, profile, max_visit_time);
     }
 
     // Clean up temp file

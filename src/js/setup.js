@@ -311,6 +311,13 @@ async function finishSetup() {
         // Mark setup as complete
         await invoke('save_setting', { key: 'setup_complete', value: 'true' });
 
+        // Enable autostart so the app launches on boot
+        try {
+            await invoke('plugin:autostart|enable');
+        } catch (e) {
+            console.warn('Could not enable autostart:', e);
+        }
+
         // Hide wizard and init app
         document.getElementById('setup-overlay').classList.add('hidden');
         initApp();

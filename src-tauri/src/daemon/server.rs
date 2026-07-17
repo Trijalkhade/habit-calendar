@@ -80,7 +80,7 @@ async fn event_handler(
 
     let now = chrono::Local::now();
     let today = now.format("%Y-%m-%d").to_string();
-    let timestamp = event.timestamp.unwrap_or_else(|| now.format("%Y-%m-%dT%H:%M:%S").to_string());
+    let _timestamp = event.timestamp.unwrap_or_else(|| now.format("%Y-%m-%dT%H:%M:%S").to_string());
 
     match event.event_type.as_str() {
         "leetcode_accepted" => {

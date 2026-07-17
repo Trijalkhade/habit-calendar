@@ -72,6 +72,26 @@ pub fn create_tables(conn: &Connection) -> Result<(), rusqlite::Error> {
         CREATE INDEX IF NOT EXISTS idx_completions_habit_date ON completions(habit_id, date);
         CREATE INDEX IF NOT EXISTS idx_violations_date ON violations(date);
         CREATE INDEX IF NOT EXISTS idx_sync_log_source ON sync_log(source, timestamp);
+
+        CREATE TABLE IF NOT EXISTS scan_cursors (
+            browser TEXT NOT NULL,
+            profile TEXT NOT NULL,
+            last_visit_time INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT DEFAULT (datetime('now')),
+            PRIMARY KEY (browser, profile)
+        );
+
+        CREATE TABLE IF NOT EXISTS connected_devices (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            ip TEXT NOT NULL,
+            port INTEGER NOT NULL DEFAULT 19848,
+            last_connected TEXT,
+            status TEXT NOT NULL DEFAULT 'offline',
+            created_at TEXT DEFAULT (datetime('now'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_violations_device ON violations(device);
         ",
     )?;
     Ok(())

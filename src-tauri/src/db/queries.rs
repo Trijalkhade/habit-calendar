@@ -667,3 +667,105 @@ fn weekday_short(date: &chrono::NaiveDate) -> String {
         chrono::Weekday::Sun => "sun".to_string(),
     }
 }
+
+// ─── Offline Catch-Up Queries ────────────────────────────────────────────
+
+/// Get the most recent successful sync timestamp across all sources
+pub fn get_last_sync_time(conn: &Connection) -> Option<String> {
+    conn.query_row(
+        "SELECT MAX(timestamp) FROM sync_log WHERE status = 'success'",
+        [],
+        |row| row.get(0),
+    )
+    .ok()
+    .flatten()
+}
+
+// ─── Scan Cursor Queries (for incremental browser history scanning) ──────
+
+/// Get the last-scanned visit timestamp for a browser profile
+pub fn get_scan_cursor(conn: &Connection, browser: &str, profile: &str) -> i64 {
+    conn.query_row(
+        "SELECT last_visit_time FROM scan_cursors WHERE browser = ? AND profile = ?",
+        params![browser, profile],
+        |row| row.get(0),
+    )
+    .unwrap_or(0)
+}
+
+/// Update the last-scanned visit timestamp for a browser profile
+pub fn set_scan_cursor(conn: &Connection, browser: &str, profile: &str, last_visit_time: i64) -> Result<(), rusqlite::Error> {
+    conn.execute(
+        "INSERT OR REPLACE INTO scan_cursors (browser, profile, last_visit_time, updated_at) VALUES (?, ?, ?, datetime('now'))",
+        params![browser, profile, last_visit_time],
+    )?;
+    Ok(())
+}
+
+// ─── Connected Device Queries ────────────────────────────────────────────
+
+use crate::daemon::devices::ConnectedDevice;
+
+/// Get all connected devices
+pub fn get_connected_devices(conn: &Connection) -> Vec<ConnectedDevice> {
+    let mut stmt = conn
+        .prepare("SELECT id, name, ip, port, last_connected, status FROM connected_devices ORDER BY name")
+        .unwrap();
+
+    stmt.query_map([], |row| {
+        Ok(ConnectedDevice {
+            id: row.get(0)?,
+            name: row.get(1)?,
+            ip: row.get(2)?,
+            port: row.get(3)?,
+            last_connected: row.get(4)?,
+            status: row.get(5)?,
+        })
+    })
+    .unwrap()
+    .filter_map(|r| r.ok())
+    .collect()
+}
+
+/// Add a new connected device
+pub fn add_connected_device(conn: &Connection, id: &str, name: &str, ip: &str, port: u16) -> Result<(), rusqlite::Error> {
+    conn.execute(
+        "INSERT OR REPLACE INTO connected_devices (id, name, ip, port, status) VALUES (?, ?, ?, ?, 'online')",
+        params![id, name, ip, port as i64],
+    )?;
+    Ok(())
+}
+
+/// Remove a connected device
+pub fn remove_connected_device(conn: &Connection, id: &str) -> Result<(), rusqlite::Error> {
+    conn.execute("DELETE FROM connected_devices WHERE id = ?", params![id])?;
+    Ok(())
+}
+
+/// Update device status
+pub fn update_device_status(conn: &Connection, id: &str, status: &str) -> Result<(), rusqlite::Error> {
+    conn.execute(
+        "UPDATE connected_devices SET status = ? WHERE id = ?",
+        params![status, id],
+    )?;
+    Ok(())
+}
+
+/// Update device last_connected timestamp
+pub fn update_device_last_connected(conn: &Connection, id: &str) -> Result<(), rusqlite::Error> {
+    conn.execute(
+        "UPDATE connected_devices SET last_connected = datetime('now') WHERE id = ?",
+        params![id],
+    )?;
+    Ok(())
+}
+
+/// Update device IP (for auto-discovery when IP changes)
+pub fn update_device_ip(conn: &Connection, id: &str, ip: &str) -> Result<(), rusqlite::Error> {
+    conn.execute(
+        "UPDATE connected_devices SET ip = ? WHERE id = ?",
+        params![ip, id],
+    )?;
+    Ok(())
+}
+
