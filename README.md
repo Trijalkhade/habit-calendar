@@ -4,7 +4,7 @@ A local habit-accountability calendar app built with Tauri.
 
 ## Installation
 
-### 🍎 macOS (Recommended — Homebrew)
+### macOS (Recommended — Homebrew)
 
 The easiest way to install on macOS. Homebrew automatically handles downloading, installing, and bypassing Gatekeeper security warnings:
 
@@ -17,14 +17,14 @@ brew install --cask trijalkhade/tap/habit-calendar
 curl -sSL https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.sh | bash
 ```
 
-### 🪟 Windows
+### Windows
 
 Open **PowerShell** and run:
 ```powershell
 iwr -useb https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.ps1 | iex
 ```
 
-### 🐧 Linux
+### Linux
 
 Download the `.deb` or `.AppImage` from the [Releases](https://github.com/Trijalkhade/habit-calendar/releases) page.
 
