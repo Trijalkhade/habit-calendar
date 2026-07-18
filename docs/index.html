@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Install Habit Calendar</title>
+  <!-- Modern Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: rgba(22, 28, 45, 0.4);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --accent: #10b981;
+      --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+      text-align: center;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 24px;
+      padding: 3rem 2rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .logo-container {
+      margin-bottom: 1.5rem;
+    }
+
+    .logo-icon {
+      font-size: 3.5rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.025em;
+      background: linear-gradient(to right, #ffffff, #d1d5db);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .tagline {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* OS Selector Tabs */
+    .os-selector {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.4rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      max-width: 450px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .os-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.8rem 1.2rem;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .os-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+
+    .os-btn:hover:not(.active) {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Terminal Wrapper */
+    .install-box {
+      display: none;
+      animation: tabFade 0.4s ease-out forwards;
+    }
+
+    .install-box.active {
+      display: block;
+    }
+
+    @keyframes tabFade {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .terminal {
+      background: #05070c;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .terminal-header {
+      background: #0d1117;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .terminal-dots {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot.red { background: #ef4444; }
+    .dot.yellow { background: #f59e0b; }
+    .dot.green { background: #10b981; }
+
+    .terminal-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .terminal-body {
+      padding: 1.25rem;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      color: #38bdf8;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-main);
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .copy-btn.copied {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
+
+    .instructions {
+      text-align: left;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 12px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 2rem;
+      border-left: 3px solid var(--primary);
+    }
+
+    .instructions ol {
+      margin-left: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .instructions li {
+      margin-bottom: 0.4rem;
+    }
+
+    .manual-download {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .manual-download a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .manual-download a:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 3rem;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="logo-container">
+      <span class="logo-icon">📅</span>
+      <h1>Habit Calendar</h1>
+      <p class="tagline">Install Habit Calendar on your system in seconds</p>
+    </div>
+
+    <!-- OS Selector Tabs -->
+    <div class="os-selector">
+      <button class="os-btn" id="mac-tab" onclick="switchOS('mac')">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516.024.034 1.52.087 2.475-1.258.955-1.345.762-2.391.728-2.43m3.314 11.733c-.073-.405-1.503-1.025-1.503-2.681 0-1.555 1.225-2.23 1.438-2.343-.029-.074-1.294-1.481-3.42-1.486-.832-.003-1.646.288-2.006.288-.36 0-1.053-.274-1.822-.274-2.286 0-3.74 1.546-3.74 3.656 0 1.53.611 3.095 1.73 4.694.752 1.075 1.579 2.012 2.398 2.012.33 0 .426-.066.822-.204.385-.132.8-.204 1.127-.204.328 0 .741.074 1.12.204.365.127.486.204.807.204.821 0 1.559-.857 2.387-2.029.742-1.053 1.059-1.817 1.09-1.867-.03-.016-1.743-.674-1.748-2.68Z"/></svg>
+        macOS
+      </button>
+      <button class="os-btn" id="win-tab" onclick="switchOS('win')">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M15.5 1h-15C.224 1 0 1.224 0 1.5v13c0 .276.224.5.5.5h15c.276 0 .5-.224.5-.5v-13c0-.276-.224-.5-.5-.5M6 14H1V8.5h5zm0-6.5H1V2h5zm9 6.5H7V8.5h8zm0-6.5H7V2h8z"/></svg>
+        Windows
+      </button>
+      <button class="os-btn" id="linux-tab" onclick="switchOS('linux')">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 0a8 8 0 0 0-8 8c0 1.5.4 2.9 1.1 4L0 16l4.2-1.1c1.1.7 2.5 1.1 3.8 1.1a8 8 0 0 0 8-8 8 8 0 0 0-8-8zm.1 12.3c-1.2 0-2.3-.3-3.2-.8l-.3-.2-2.3.6.6-2.2-.2-.3a5.5 5.5 0 0 1-.8-2.9 5.6 5.6 0 0 1 5.6-5.6 5.6 5.6 0 0 1 5.6 5.6 5.6 5.6 0 0 1-5.3 5.8z"/></svg>
+        Linux (Ubuntu)
+      </button>
+    </div>
+
+    <!-- macOS Install Content -->
+    <div id="mac-content" class="install-box">
+      <div class="instructions">
+        <strong>⚡ 1-Click Install (Bypasses Gatekeeper warnings)</strong>
+        <ol>
+          <li>Open the <strong>Terminal</strong> app on your Mac.</li>
+          <li>Copy and paste the command below, then press <strong>Enter</strong>.</li>
+          <li>The script will download, install, and launch the app automatically.</li>
+        </ol>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-title">Terminal</span>
+        </div>
+        <div class="terminal-body">
+          <code id="mac-cmd">curl -sSL https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.sh | bash</code>
+          <button class="copy-btn" onclick="copyCommand('mac-cmd', this)">
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Windows Install Content -->
+    <div id="win-content" class="install-box">
+      <div class="instructions">
+        <strong>⚡ 1-Click Install (Bypasses SmartScreen warnings)</strong>
+        <ol>
+          <li>Search for <strong>PowerShell</strong> in your Start menu.</li>
+          <li>Copy and paste the command below, then press <strong>Enter</strong>.</li>
+          <li>The script will download, install, and open Habit Calendar.</li>
+        </ol>
+      </div>
+
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-title">PowerShell</span>
+        </div>
+        <div class="terminal-body">
+          <code id="win-cmd">iwr -useb https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.ps1 | iex</code>
+          <button class="copy-btn" onclick="copyCommand('win-cmd', this)">
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linux Install Content -->
+    <div id="linux-content" class="install-box">
+      <div class="instructions">
+        <strong>⚡ Build from Source / Manual Installation</strong>
+        <ol>
+          <li>Tauri binaries are compiled for Windows (.msi/.exe) and macOS (.dmg) by default.</li>
+          <li>For Linux, you can clone and build the app using <code>npm run tauri build</code>.</li>
+        </ol>
+      </div>
+      <div class="terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+          </div>
+          <span class="terminal-title">Bash</span>
+        </div>
+        <div class="terminal-body">
+          <code id="linux-cmd">git clone https://github.com/Trijalkhade/habit-calendar.git && cd habit-calendar && npm install && npm run tauri build</code>
+          <button class="copy-btn" onclick="copyCommand('linux-cmd', this)">
+            <span>Copy</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="manual-download">
+      Looking for traditional installers? 
+      <a href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank">Browse GitHub Releases</a>
+    </div>
+  </div>
+
+  <footer>
+    &copy; 2026 Habit Calendar Team. Free & Open Source.
+  </footer>
+
+  <script>
+    // Detect OS and switch tab automatically
+    window.addEventListener('DOMContentLoaded', () => {
+      const platform = navigator.platform.toLowerCase();
+      const userAgent = navigator.userAgent.toLowerCase();
+      
+      if (platform.includes('mac') || userAgent.includes('mac')) {
+        switchOS('mac');
+      } else if (platform.includes('win') || userAgent.includes('win')) {
+        switchOS('win');
+      } else if (platform.includes('linux') || userAgent.includes('linux') || userAgent.includes('ubuntu')) {
+        switchOS('linux');
+      } else {
+        switchOS('mac'); // Default fallback
+      }
+    });
+
+    function switchOS(os) {
+      // Hide all content boxes
+      document.querySelectorAll('.install-box').forEach(box => {
+        box.classList.remove('active');
+      });
+      // Deactivate all buttons
+      document.querySelectorAll('.os-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      // Show selected content and activate tab
+      document.getElementById(`${os}-content`).classList.add('active');
+      document.getElementById(`${os}-tab`).classList.add('active');
+    }
+
+    function copyCommand(elementId, btn) {
+      const codeText = document.getElementById(elementId).innerText;
+      
+      navigator.clipboard.writeText(codeText).then(() => {
+        const span = btn.querySelector('span');
+        btn.classList.add('copied');
+        span.innerText = 'Copied!';
+        
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          span.innerText = 'Copy';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+  </script>
+</body>
+</html>
