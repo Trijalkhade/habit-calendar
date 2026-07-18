@@ -45,7 +45,36 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'Habit Calendar v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseBody: |
+            ## 🚀 How to Install
+
+            ### 🍎 macOS (Recommended — Homebrew)
+            ```bash
+            brew install --cask trijalkhade/tap/habit-calendar
+            ```
+            This automatically downloads, installs, and removes Gatekeeper restrictions.
+
+            **Or use the install script:**
+            ```bash
+            curl -sSL https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.sh | bash
+            ```
+
+            ### 🪟 Windows
+            Open **PowerShell** and run:
+            ```powershell
+            iwr -useb https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.ps1 | iex
+            ```
+
+            ### 🐧 Linux
+            Download the `.deb` or `.AppImage` file below.
+
+            ---
+
+            ### ⚠️ Manual Download Note
+            If you download the files below directly, your OS may show a security warning because the app is not yet code-signed.
+            - **macOS**: Right-click the app → Open → Open, or run `xattr -cr "/Applications/Habit Calendar.app"` in Terminal.
+            - **Windows**: Click **More info** → **Run anyway**.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.platform == 'macos-latest' && '--target universal-apple-darwin' || '' }}
+

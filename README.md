@@ -1,32 +1,42 @@
-# Tauri + Vanilla
+# Habit Calendar
 
-This template should help get you started developing with Tauri in vanilla HTML, CSS and Javascript.
-
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+A local habit-accountability calendar app built with Tauri.
 
 ## Installation
 
-The easiest way to install Habit Calendar without dealing with security warnings (Gatekeeper on macOS or SmartScreen on Windows) is to use the automated install scripts. These scripts will automatically download the latest version, bypass the warnings, and open the app for you.
+### 🍎 macOS (Recommended — Homebrew)
 
-### macOS
-Open your **Terminal** and run the following command:
+The easiest way to install on macOS. Homebrew automatically handles downloading, installing, and bypassing Gatekeeper security warnings:
+
+```bash
+brew install --cask trijalkhade/tap/habit-calendar
+```
+
+**Or use the install script:**
 ```bash
 curl -sSL https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.sh | bash
 ```
 
-### Windows
-Open **PowerShell** as Administrator and run the following command:
+### 🪟 Windows
+
+Open **PowerShell** and run:
 ```powershell
 iwr -useb https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.ps1 | iex
 ```
 
+### 🐧 Linux
+
+Download the `.deb` or `.AppImage` from the [Releases](https://github.com/Trijalkhade/habit-calendar/releases) page.
+
 ---
 
-### Manual Installation & Troubleshooting
+### Manual Installation
 
-If you prefer to download the app manually from the [Releases](https://github.com/Trijalkhade/habit-calendar/releases) page, you may see security warnings because the app is currently unsigned.
+If you prefer to download the installer manually from the [Releases](https://github.com/Trijalkhade/habit-calendar/releases) page, you may see a security warning because the app is not yet code-signed.
 
-*   **macOS:** Right-click the app in Finder and select **Open**, then click Open again. Alternatively, run `xattr -cr "/Applications/Habit Calendar.app"` in your terminal.
-*   **Windows:** Click **More info**, then **Run anyway**.
+- **macOS:** Right-click the app → select **Open** → click **Open** again. Or run: `xattr -cr "/Applications/Habit Calendar.app"`
+- **Windows:** Click **More info** → **Run anyway**.
+
+## Recommended IDE Setup
+
+- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
