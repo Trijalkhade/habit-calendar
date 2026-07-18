@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Install Habit Calendar</title>
-  <meta name="description" content="Download and install Habit Calendar — a local habit-accountability calendar app for macOS, Windows, and Linux.">
+  <meta name="description"
+    content="Download and install Habit Calendar — a local habit-accountability calendar app for macOS, Windows, and Linux.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-  
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+
   <style>
     :root {
       --bg-color: #0b0f19;
@@ -23,7 +27,11 @@
       --font-mono: 'JetBrains Mono', monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       background-color: var(--bg-color);
@@ -36,7 +44,7 @@
       justify-content: center;
       padding: 2rem;
       overflow-x: hidden;
-      background-image: 
+      background-image:
         radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
         radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
     }
@@ -56,8 +64,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .logo-icon {
@@ -131,11 +146,21 @@
       display: none;
       animation: tabFade 0.4s ease-out forwards;
     }
-    .install-box.active { display: block; }
+
+    .install-box.active {
+      display: block;
+    }
 
     @keyframes tabFade {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
+      from {
+        opacity: 0;
+        transform: scale(0.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
     }
 
     /* Method Selector (sub-tabs) */
@@ -170,8 +195,13 @@
       color: var(--text-main);
     }
 
-    .method-content { display: none; }
-    .method-content.active { display: block; }
+    .method-content {
+      display: none;
+    }
+
+    .method-content.active {
+      display: block;
+    }
 
     .recommended-badge {
       display: inline-block;
@@ -207,12 +237,34 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.03);
     }
 
-    .terminal-dots { display: flex; gap: 0.4rem; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot.red { background: #ef4444; }
-    .dot.yellow { background: #f59e0b; }
-    .dot.green { background: #10b981; }
-    .terminal-title { font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono); }
+    .terminal-dots {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .dot.red {
+      background: #ef4444;
+    }
+
+    .dot.yellow {
+      background: #f59e0b;
+    }
+
+    .dot.green {
+      background: #10b981;
+    }
+
+    .terminal-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
 
     .terminal-body {
       padding: 1.25rem;
@@ -246,8 +298,16 @@
       flex-shrink: 0;
     }
 
-    .copy-btn:hover { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.2); }
-    .copy-btn.copied { background: var(--accent); border-color: var(--accent); color: white; }
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .copy-btn.copied {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: white;
+    }
 
     .instructions {
       text-align: left;
@@ -261,8 +321,14 @@
       border-left: 3px solid var(--primary);
     }
 
-    .instructions ol { margin-left: 1.2rem; margin-top: 0.5rem; }
-    .instructions li { margin-bottom: 0.4rem; }
+    .instructions ol {
+      margin-left: 1.2rem;
+      margin-top: 0.5rem;
+    }
+
+    .instructions li {
+      margin-bottom: 0.4rem;
+    }
 
     .benefit-tag {
       display: inline-block;
@@ -277,7 +343,10 @@
       margin-bottom: 0.5rem;
     }
 
-    .benefits { margin-bottom: 1.25rem; text-align: left; }
+    .benefits {
+      margin-bottom: 1.25rem;
+      text-align: left;
+    }
 
     .manual-download {
       font-size: 0.9rem;
@@ -292,7 +361,10 @@
       transition: color 0.2s;
     }
 
-    .manual-download a:hover { color: var(--primary-hover); text-decoration: underline; }
+    .manual-download a:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
 
     footer {
       margin-top: 3rem;
@@ -301,33 +373,51 @@
     }
 
     @media (max-width: 600px) {
-      .container { padding: 2rem 1.25rem; }
-      h1 { font-size: 1.8rem; }
-      .os-selector { flex-direction: column; max-width: 280px; }
-      .method-selector { flex-wrap: wrap; }
-      .terminal-body { flex-direction: column; }
-      code { font-size: 0.75rem; }
+      .container {
+        padding: 2rem 1.25rem;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .os-selector {
+        flex-direction: column;
+        max-width: 280px;
+      }
+
+      .method-selector {
+        flex-wrap: wrap;
+      }
+
+      .terminal-body {
+        flex-direction: column;
+      }
+
+      code {
+        font-size: 0.75rem;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <div class="container">
-    <span class="logo-icon">📅</span>
     <h1>Habit Calendar</h1>
-    <p class="tagline">Install on your system in seconds — no security warnings</p>
 
     <!-- OS Selector Tabs -->
     <div class="os-selector">
-      <button class="os-btn" id="mac-tab" onclick="switchOS('mac')">🍎 macOS</button>
-      <button class="os-btn" id="win-tab" onclick="switchOS('win')">🪟 Windows</button>
-      <button class="os-btn" id="linux-tab" onclick="switchOS('linux')">🐧 Linux</button>
+      <button class="os-btn" id="mac-tab" onclick="switchOS('mac')">macOS</button>
+      <button class="os-btn" id="win-tab" onclick="switchOS('win')">Windows</button>
+      <button class="os-btn" id="linux-tab" onclick="switchOS('linux')">Linux</button>
     </div>
 
     <!-- ==================== macOS ==================== -->
     <div id="mac-content" class="install-box">
       <div class="method-selector">
-        <button class="method-btn active" onclick="switchMethod('mac', 'brew')">Homebrew <span class="recommended-badge">Recommended</span></button>
+        <button class="method-btn active" onclick="switchMethod('mac', 'brew')">Homebrew <span
+            class="recommended-badge">Recommended</span></button>
         <button class="method-btn" onclick="switchMethod('mac', 'script')">Install Script</button>
         <button class="method-btn" onclick="switchMethod('mac', 'manual')">Manual</button>
       </div>
@@ -342,14 +432,16 @@
         <div class="instructions">
           <strong>⚡ Install via Homebrew</strong>
           <ol>
-            <li>Open the <strong>Terminal</strong> app (press <strong>⌘ + Space</strong>, type "Terminal", hit Enter).</li>
+            <li>Open the <strong>Terminal</strong> app (press <strong>⌘ + Space</strong>, type "Terminal", hit Enter).
+            </li>
             <li>Paste the command below and press <strong>Enter</strong>.</li>
             <li>The app will be installed and ready to use — zero warnings!</li>
           </ol>
         </div>
         <div class="terminal">
           <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span
+                class="dot green"></span></div>
             <span class="terminal-title">Terminal</span>
           </div>
           <div class="terminal-body">
@@ -366,20 +458,23 @@
           <span class="benefit-tag">✔ No Homebrew needed</span>
         </div>
         <div class="instructions">
-          <strong>⚡ Install via Script</strong>
+          <strong>Install via Script</strong>
           <ol>
-            <li>Open the <strong>Terminal</strong> app (press <strong>⌘ + Space</strong>, type "Terminal", hit Enter).</li>
+            <li>Open the <strong>Terminal</strong> app (press <strong>⌘ + Space</strong>, type "Terminal", hit Enter).
+            </li>
             <li>Paste the command below and press <strong>Enter</strong>.</li>
             <li>The script downloads, installs, and opens the app automatically.</li>
           </ol>
         </div>
         <div class="terminal">
           <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span
+                class="dot green"></span></div>
             <span class="terminal-title">Terminal</span>
           </div>
           <div class="terminal-body">
-            <code id="mac-script-cmd">curl -sSL https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.sh | bash</code>
+            <code
+              id="mac-script-cmd">curl -sSL https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.sh | bash</code>
             <button class="copy-btn" onclick="copyCommand('mac-script-cmd', this)"><span>Copy</span></button>
           </div>
         </div>
@@ -388,11 +483,15 @@
       <!-- Manual -->
       <div id="mac-manual" class="method-content">
         <div class="instructions">
-          <strong>📥 Manual Installation</strong>
+          <strong>Manual Installation</strong>
           <ol>
-            <li>Download the <code>.dmg</code> file from <a href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a>.</li>
+            <li>Download the <code>.dmg</code> file from <a
+                href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank"
+                style="color: var(--primary);">GitHub Releases</a>.</li>
             <li>Open the <code>.dmg</code> and drag the app to your <strong>Applications</strong> folder.</li>
-            <li><strong>Right-click</strong> the app in Applications → select <strong>Open</strong> → click <strong>Open</strong> again.</li>
+            <li><strong>Right-click</strong> the app in Applications → select <strong>Open</strong> → click
+              <strong>Open</strong> again.
+            </li>
             <li>Or run in Terminal: <code>xattr -cr "/Applications/Habit Calendar.app"</code></li>
           </ol>
         </div>
@@ -402,7 +501,8 @@
     <!-- ==================== Windows ==================== -->
     <div id="win-content" class="install-box">
       <div class="method-selector">
-        <button class="method-btn active" onclick="switchMethod('win', 'script')">Install Script <span class="recommended-badge">Recommended</span></button>
+        <button class="method-btn active" onclick="switchMethod('win', 'script')">Install Script <span
+            class="recommended-badge">Recommended</span></button>
         <button class="method-btn" onclick="switchMethod('win', 'manual')">Manual</button>
       </div>
 
@@ -416,18 +516,22 @@
         <div class="instructions">
           <strong>⚡ Install via PowerShell</strong>
           <ol>
-            <li>Press <strong>Win + X</strong> and select <strong>Terminal</strong> (or search for <strong>PowerShell</strong> in the Start menu).</li>
+            <li>Press <strong>Win + X</strong> and select <strong>Terminal</strong> (or search for
+              <strong>PowerShell</strong> in the Start menu).
+            </li>
             <li>Paste the command below and press <strong>Enter</strong>.</li>
             <li>The script downloads, installs, and opens the app automatically.</li>
           </ol>
         </div>
         <div class="terminal">
           <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span
+                class="dot green"></span></div>
             <span class="terminal-title">PowerShell</span>
           </div>
           <div class="terminal-body">
-            <code id="win-script-cmd">iwr -useb https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.ps1 | iex</code>
+            <code
+              id="win-script-cmd">iwr -useb https://raw.githubusercontent.com/Trijalkhade/habit-calendar/main/install.ps1 | iex</code>
             <button class="copy-btn" onclick="copyCommand('win-script-cmd', this)"><span>Copy</span></button>
           </div>
         </div>
@@ -436,9 +540,11 @@
       <!-- Manual -->
       <div id="win-manual" class="method-content">
         <div class="instructions">
-          <strong>📥 Manual Installation</strong>
+          <strong>Manual Installation</strong>
           <ol>
-            <li>Download the <code>.exe</code> or <code>.msi</code> file from <a href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a>.</li>
+            <li>Download the <code>.exe</code> or <code>.msi</code> file from <a
+                href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank"
+                style="color: var(--primary);">GitHub Releases</a>.</li>
             <li>If a <strong>Windows protected your PC</strong> warning appears, click <strong>More info</strong>.</li>
             <li>Then click <strong>Run anyway</strong>.</li>
           </ol>
@@ -457,15 +563,18 @@
       <!-- Deb -->
       <div id="linux-deb" class="method-content active">
         <div class="instructions">
-          <strong>📦 Install via .deb package</strong>
+          <strong>Install via .deb package</strong>
           <ol>
-            <li>Download the <code>.deb</code> file from <a href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a>.</li>
+            <li>Download the <code>.deb</code> file from <a
+                href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank"
+                style="color: var(--primary);">GitHub Releases</a>.</li>
             <li>Run the command below (replace the filename if needed).</li>
           </ol>
         </div>
         <div class="terminal">
           <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span
+                class="dot green"></span></div>
             <span class="terminal-title">Bash</span>
           </div>
           <div class="terminal-body">
@@ -478,19 +587,23 @@
       <!-- AppImage -->
       <div id="linux-appimage" class="method-content">
         <div class="instructions">
-          <strong>📦 Run as AppImage</strong>
+          <strong>Run as AppImage</strong>
           <ol>
-            <li>Download the <code>.AppImage</code> file from <a href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank" style="color: var(--primary);">GitHub Releases</a>.</li>
+            <li>Download the <code>.AppImage</code> file from <a
+                href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank"
+                style="color: var(--primary);">GitHub Releases</a>.</li>
             <li>Make it executable and run it.</li>
           </ol>
         </div>
         <div class="terminal">
           <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span
+                class="dot green"></span></div>
             <span class="terminal-title">Bash</span>
           </div>
           <div class="terminal-body">
-            <code id="linux-appimage-cmd">chmod +x Habit.Calendar_*_amd64.AppImage && ./Habit.Calendar_*_amd64.AppImage</code>
+            <code
+              id="linux-appimage-cmd">chmod +x Habit.Calendar_*_amd64.AppImage && ./Habit.Calendar_*_amd64.AppImage</code>
             <button class="copy-btn" onclick="copyCommand('linux-appimage-cmd', this)"><span>Copy</span></button>
           </div>
         </div>
@@ -499,19 +612,22 @@
       <!-- Source -->
       <div id="linux-source" class="method-content">
         <div class="instructions">
-          <strong>🔧 Build from Source</strong>
+          <strong>Build from Source</strong>
           <ol>
-            <li>Make sure you have <strong>Node.js</strong>, <strong>Rust</strong>, and Tauri's system dependencies installed.</li>
+            <li>Make sure you have <strong>Node.js</strong>, <strong>Rust</strong>, and Tauri's system dependencies
+              installed.</li>
             <li>Run the command below to clone, build, and install.</li>
           </ol>
         </div>
         <div class="terminal">
           <div class="terminal-header">
-            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span></div>
+            <div class="terminal-dots"><span class="dot red"></span><span class="dot yellow"></span><span
+                class="dot green"></span></div>
             <span class="terminal-title">Bash</span>
           </div>
           <div class="terminal-body">
-            <code id="linux-source-cmd">git clone https://github.com/Trijalkhade/habit-calendar.git && cd habit-calendar && npm install && npm run tauri build</code>
+            <code
+              id="linux-source-cmd">git clone https://github.com/Trijalkhade/habit-calendar.git && cd habit-calendar && npm install && npm run tauri build</code>
             <button class="copy-btn" onclick="copyCommand('linux-source-cmd', this)"><span>Copy</span></button>
           </div>
         </div>
@@ -519,11 +635,12 @@
     </div>
 
     <div class="manual-download">
-      All installers available at <a href="https://github.com/Trijalkhade/habit-calendar/releases" target="_blank">GitHub Releases</a>
+      All installers available at <a href="https://github.com/Trijalkhade/habit-calendar/releases"
+        target="_blank">GitHub Releases</a>
     </div>
   </div>
 
-  <footer>&copy; 2026 Habit Calendar. Free &amp; Open Source.</footer>
+  <footer>&copy; 2026 Habit Calendar. Price: ₹200/-</footer>
 
   <script>
     // Auto-detect OS on page load
@@ -561,5 +678,6 @@
     }
   </script>
 </body>
+
 </html>
 <!-- Trigger GitHub Pages Deployment -->
