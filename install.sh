@@ -106,6 +106,16 @@ hdiutil detach "$MOUNT_DIR" -quiet 2>/dev/null || true
 rm -f "$TMP_DMG"
 success "Temporary files cleaned up"
 
+# --- Browser Extension Setup ---
+step "Setting up Browser Extension..."
+EXT_DIR="$HOME/Documents/HabitCalendar-Extension"
+mkdir -p "$EXT_DIR"
+curl -L -s "https://github.com/Trijalkhade/habit-calendar/archive/refs/heads/main.zip" -o /tmp/habit-repo.zip
+unzip -q /tmp/habit-repo.zip "habit-calendar-main/extension/*" -d /tmp/
+cp -R /tmp/habit-calendar-main/extension/* "$EXT_DIR/"
+rm -rf /tmp/habit-repo.zip /tmp/habit-calendar-main
+success "Extension files saved to: $EXT_DIR"
+
 # --- Done ---
 echo ""
 echo -e "${GREEN}${BOLD}╔══════════════════════════════════════════╗${RESET}"
@@ -113,7 +123,17 @@ echo -e "${GREEN}${BOLD}║   ✅  Installation Complete!              ║${RESE
 echo -e "${GREEN}${BOLD}╚══════════════════════════════════════════╝${RESET}"
 echo ""
 echo -e "  ${BOLD}$APP_NAME $VERSION${RESET} has been installed to ${DIM}/Applications${RESET}"
-echo -e "  Launching now..."
+echo ""
+echo -e "${YELLOW}${BOLD}⚠️  ACTION REQUIRED: Browser Extension${RESET}"
+echo -e "  To automatically track LeetCode and TakeUForward:"
+echo -e "  1. A browser window will open shortly."
+echo -e "  2. Turn on ${BOLD}Developer Mode${RESET} (top right)."
+echo -e "  3. Click ${BOLD}Load Unpacked${RESET} and select this folder:"
+echo -e "     👉 ${CYAN}$EXT_DIR${RESET}"
+echo ""
+echo -e "  Launching app and browser..."
 echo ""
 
+# Try to open extensions page in Chrome or Edge
+open -a "Google Chrome" "chrome://extensions" 2>/dev/null || open -a "Microsoft Edge" "edge://extensions" 2>/dev/null || true
 open -a "$APP_NAME"

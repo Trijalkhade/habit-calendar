@@ -114,6 +114,33 @@ Write-Step "Cleaning up..."
 Remove-Item -Path $installerPath -Force -ErrorAction SilentlyContinue
 Write-Ok "Temporary files cleaned up"
 
+# --- Browser Extension Setup ---
+Write-Step "Setting up Browser Extension..."
+$extDir = Join-Path $env:USERPROFILE "Documents\HabitCalendar-Extension"
+if (-not (Test-Path $extDir)) {
+    New-Item -ItemType Directory -Path $extDir | Out-Null
+}
+
+$extZip = Join-Path $env:TEMP "habit-repo.zip"
+try {
+    $ProgressPreference = 'SilentlyContinue'
+    Invoke-WebRequest -Uri "https://github.com/Trijalkhade/habit-calendar/archive/refs/heads/main.zip" -OutFile $extZip -UseBasicParsing
+    
+    $extractPath = Join-Path $env:TEMP "habit-calendar-extract"
+    if (Test-Path $extractPath) { Remove-Item -Path $extractPath -Recurse -Force }
+    Expand-Archive -Path $extZip -DestinationPath $extractPath -Force
+    
+    $sourceExt = Join-Path $extractPath "habit-calendar-main\extension"
+    Copy-Item -Path "$sourceExt\*" -Destination $extDir -Recurse -Force
+    
+    Remove-Item -Path $extZip -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+    $ProgressPreference = 'Continue'
+    Write-Ok "Extension files saved to: $extDir"
+} catch {
+    Write-Warn "Could not automatically download the extension: $_"
+}
+
 # --- Launch ---
 Write-Host ""
 Write-Host "╔══════════════════════════════════════════╗" -ForegroundColor White
@@ -133,8 +160,20 @@ $exePath = $possiblePaths | Where-Object { Test-Path $_ } | Select-Object -First
 
 if ($exePath) {
     Write-Host "  $appName $version installed successfully!" -ForegroundColor White
-    Write-Host "  Launching now..." -ForegroundColor DarkGray
     Write-Host ""
+    Write-Host "⚠️  ACTION REQUIRED: Browser Extension" -ForegroundColor Yellow
+    Write-Host "  To automatically track LeetCode and TakeUForward:" -ForegroundColor White
+    Write-Host "  1. A browser window will open shortly." -ForegroundColor White
+    Write-Host "  2. Turn on Developer Mode (left sidebar or top right)." -ForegroundColor White
+    Write-Host "  3. Click Load Unpacked and select this folder:" -ForegroundColor White
+    Write-Host "     👉 $extDir" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "  Launching app and browser..." -ForegroundColor DarkGray
+    Write-Host ""
+    
+    # Try opening Edge or Chrome to extensions
+    Start-Process "microsoft-edge:edge://extensions" -ErrorAction SilentlyContinue
+    
     Start-Process -FilePath $exePath
 } else {
     Write-Host "  $appName $version installed successfully!" -ForegroundColor White
