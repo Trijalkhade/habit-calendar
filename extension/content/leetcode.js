@@ -17,48 +17,61 @@
     });
 
     function checkForAccepted(element) {
-        // LeetCode shows "Accepted" in multiple ways:
-        // 1. A success result panel with "Accepted" text
-        // 2. A green checkmark icon with success status
+        // LeetCode's new UI uses specific data attributes and exact text
+        const resultEls = [];
+        if (element.matches && element.matches('[data-e2e-locator="submission-result"]')) {
+            resultEls.push(element);
+        }
+        if (element.querySelectorAll) {
+            resultEls.push(...element.querySelectorAll('[data-e2e-locator="submission-result"]'));
+        }
 
-        const text = element.textContent || '';
-        const html = element.innerHTML || '';
+        for (const resultEl of resultEls) {
+            const text = resultEl.textContent.trim();
+            
+            // MUST exactly match "Accepted" to avoid "Not Accepted"
+            if (text === 'Accepted' && resultEl.classList.contains('text-green-s')) {
+                triggerCompletion();
+                return;
+            }
+        }
 
-        // Check for "Accepted" status in submission result
-        if (
-            (text.includes('Accepted') && !text.includes('Not Accepted')) ||
-            html.includes('data-e2e-locator="submission-result"') ||
-            element.querySelector?.('[data-e2e-locator="submission-result"]')
-        ) {
-            // Verify it's actually an accepted result (green success state)
-            const hasSuccess =
-                element.classList?.contains('text-green') ||
-                element.querySelector?.('.text-green-s, .text-green-60, [class*="success"], [class*="accepted"]') ||
-                text.match(/Accepted/i);
+        // Fallback for older UI or alternate views: check for specific classes and EXACT text
+        const successEls = [];
+        if (element.matches && element.matches('.success, .accepted, .text-green, .text-green-60')) {
+            successEls.push(element);
+        }
+        if (element.querySelectorAll) {
+            successEls.push(...element.querySelectorAll('.success, .accepted, .text-green, .text-green-60'));
+        }
 
-            if (hasSuccess) {
-                // Extract problem title from the page
-                const title = getProblemTitle();
-                const submissionKey = `${title}-${Date.now()}`;
-
-                // Debounce: don't send the same submission twice within 5 seconds
-                if (submissionKey !== lastDetectedSubmission) {
-                    lastDetectedSubmission = submissionKey;
-
-                    chrome.runtime.sendMessage({
-                        type: 'leetcode_accepted',
-                        title: title,
-                        url: window.location.href,
-                    });
-
-                    console.log('[Habit Calendar] LeetCode accepted submission detected:', title);
-                }
+        for (const el of successEls) {
+            if (el.textContent.trim() === 'Accepted') {
+                triggerCompletion();
+                return;
             }
         }
     }
 
+    function triggerCompletion() {
+        const title = getProblemTitle();
+        const submissionKey = `${title}-${Date.now()}`;
+
+        // Debounce: don't send the same submission twice within 5 seconds
+        if (submissionKey !== lastDetectedSubmission) {
+            lastDetectedSubmission = submissionKey;
+
+            chrome.runtime.sendMessage({
+                type: 'leetcode_accepted',
+                title: title,
+                url: window.location.href,
+            });
+
+            console.log('[Habit Calendar] LeetCode accepted submission detected:', title);
+        }
+    }
+
     function getProblemTitle() {
-        // Try multiple selectors for the problem title
         const selectors = [
             'a[href*="/problems/"] span',
             '[data-cy="question-title"]',
@@ -74,7 +87,6 @@
             }
         }
 
-        // Fallback: extract from URL
         const match = window.location.pathname.match(/\/problems\/([^/]+)/);
         if (match) {
             return match[1].replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -83,14 +95,34 @@
         return 'Unknown Problem';
     }
 
-    // Start observing
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-    });
+    observer.observe(document.body, { childList: true, subtree: true });
 
-    // Also check for already-loaded accepted results
-    setTimeout(() => {
-        document.querySelectorAll('[class*="success"], [class*="accepted"]').forEach(checkForAccepted);
-    }, 2000);
+    // Intercept GraphQL requests to catch submissions robustly
+    const script = document.createElement('script');
+    script.textContent = `
+        const originalFetch = window.fetch;
+        window.fetch = async function(...args) {
+            const response = await originalFetch.apply(this, args);
+            try {
+                const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
+                if (url.includes('graphql') || url.includes('submit')) {
+                    const clone = response.clone();
+                    clone.json().then(data => {
+                        // Check for successful submission response payload
+                        if (data && data.status_msg === 'Accepted' || (data.data && data.data.submissionDetails && data.data.submissionDetails.statusDisplay === 'Accepted')) {
+                            window.postMessage({ type: 'LC_SUBMISSION_ACCEPTED' }, '*');
+                        }
+                    }).catch(e => {});
+                }
+            } catch(e) {}
+            return response;
+        };
+    `;
+    document.documentElement.appendChild(script);
+    script.remove();
+
+    window.addEventListener('message', (event) => {
+        if (event.source !== window || !event.data || event.data.type !== 'LC_SUBMISSION_ACCEPTED') return;
+        triggerCompletion();
+    });
 })();
