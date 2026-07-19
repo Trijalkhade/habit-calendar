@@ -349,7 +349,8 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
                 <div class="settings-section-title" style="color: var(--red-violation);">⚠ Full Disk Access Required</div>
                 <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
                     Habit Calendar needs Full Disk Access to scan browser history for blacklisted sites.<br>
-                    <strong>Go to:</strong> System Settings → Privacy & Security → Full Disk Access → Enable "Habit Calendar"
+                    <strong>Go to:</strong> System Settings → Privacy & Security → Full Disk Access → Enable "Habit Calendar"<br>
+                    <em>Alternative: If you prefer not to grant OS permissions, please install our Browser Extension to track history automatically.</em>
                 </div>
             `;
             container.insertBefore(fdaWarning, container.firstChild);
@@ -377,29 +378,14 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
     syncList.className = 'sync-status-list';
 
     if (diagnostics.sync_statuses && diagnostics.sync_statuses.length > 0) {
-        diagnostics.sync_statuses.forEach(s => {
-            const item = document.createElement('div');
-            item.className = 'sync-status-item';
-            item.innerHTML = `
-                <div class="sync-dot ${s.status}"></div>
-                <div class="sync-source">${formatSyncSource(s.source)}</div>
-                <div class="sync-time">${formatRelativeTime(s.timestamp)}</div>
-            `;
-            syncList.appendChild(item);
-        });
+        syncList.innerHTML = '<div style="font-size: 12px; color: var(--green-complete); padding: 8px;">✓ Background sync is active</div>';
     } else {
-        syncList.innerHTML = '<div style="font-size: 12px; color: var(--text-tertiary); padding: 8px;">No sync activity yet. Data will appear after the first poll cycle.</div>';
+        syncList.innerHTML = '<div style="font-size: 12px; color: var(--text-tertiary); padding: 8px;">Waiting for first sync cycle...</div>';
     }
 
     diagSection.appendChild(syncList);
 
-    // Server port info
-    const portInfo = document.createElement('div');
-    portInfo.style.cssText = 'font-size: 11px; color: var(--text-tertiary); margin-top: 12px; line-height: 1.5;';
-    portInfo.innerHTML = `Extension server: 127.0.0.1:${diagnostics.server_port}<br>
-    Local Wi-Fi IP (for Mobile Sync): <strong style="color: var(--text-primary)">${diagnostics.local_ip}:${diagnostics.server_port}</strong><br>
-    DB: ${diagnostics.db_path}`;
-    diagSection.appendChild(portInfo);
+    // Tech info (IP, DB path) hidden to reduce UI clutter and hide implementation details.
 
     container.appendChild(diagSection);
 }
@@ -408,12 +394,12 @@ async function triggerResetAndBackfill() {
     const btn = document.getElementById('btn-reset-backfill');
     const status = document.getElementById('reset-status');
     btn.disabled = true;
-    btn.textContent = 'Resetting...';
-    status.textContent = 'Clearing data and backfilling from APIs...';
+    btn.textContent = 'Syncing...';
+    status.innerHTML = '<div class="loading-bar-container" style="width: 100%; height: 4px; background: #2a2a2a; border-radius: 2px; overflow: hidden;"><div class="loading-bar" style="width: 30%; height: 100%; background: var(--text-primary); animation: load 1.5s infinite ease-in-out;"></div></div><style>@keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(400%); } }</style>';
 
     try {
         const result = await invoke('reset_and_backfill');
-        status.textContent = result;
+        status.textContent = '';
         btn.textContent = 'Done ✓';
         btn.style.background = 'var(--green-complete)';
         // Refresh calendar data
@@ -421,7 +407,7 @@ async function triggerResetAndBackfill() {
         renderCalendar();
         renderMiniCalendar();
     } catch (e) {
-        status.textContent = `Error: ${e}`;
+        status.textContent = ''; // Fail silently on UI as requested
         btn.textContent = 'Reset & Backfill (6 months)';
         btn.disabled = false;
     }

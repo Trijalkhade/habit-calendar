@@ -60,7 +60,7 @@ pub async fn start_daemon(db: Arc<Mutex<Connection>>, server_port: u16, app_hand
     let lc_db = db.clone();
     let lc_handle = app_handle.clone();
     tokio::spawn(async move {
-        let mut interval = interval(Duration::from_secs(30 * 60));
+        let mut interval = interval(Duration::from_secs(120 * 60));
         loop {
             interval.tick().await;
             info!("Polling LeetCode...");
@@ -76,7 +76,7 @@ pub async fn start_daemon(db: Arc<Mutex<Connection>>, server_port: u16, app_hand
     let daily_db = db.clone();
     let daily_handle = app_handle.clone();
     tokio::spawn(async move {
-        let mut interval = interval(Duration::from_secs(30 * 60));
+        let mut interval = interval(Duration::from_secs(120 * 60));
         loop {
             interval.tick().await;
             info!("Checking LeetCode daily problem...");
@@ -92,7 +92,7 @@ pub async fn start_daemon(db: Arc<Mutex<Connection>>, server_port: u16, app_hand
     let cc_db = db.clone();
     let cc_handle = app_handle.clone();
     tokio::spawn(async move {
-        let mut interval = interval(Duration::from_secs(60 * 60));
+        let mut interval = interval(Duration::from_secs(120 * 60));
         loop {
             interval.tick().await;
             info!("Polling CodeChef...");

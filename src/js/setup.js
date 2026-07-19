@@ -222,24 +222,24 @@ async function validateField(platform, username) {
     const inputEl = document.getElementById(platform === 'leetcode' ? 'setup-leetcode' : 'setup-codechef');
 
     statusEl.className = 'validation-status checking';
-    statusEl.textContent = 'Checking...';
+    statusEl.innerHTML = '<div class="spinner" style="width:14px;height:14px;border:2px solid var(--text-tertiary);border-top-color:var(--text-primary);border-radius:50%;animation:spin 1s linear infinite;"></div><style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>';
 
     try {
         const valid = await invoke('validate_username', { platform, username: username.trim() });
         if (valid) {
             statusEl.className = 'validation-status valid';
-            statusEl.textContent = '✓ Profile found';
+            statusEl.innerHTML = '<span style="color:var(--green-complete);font-weight:bold;">✓</span>';
             inputEl.classList.add('valid');
             inputEl.classList.remove('invalid');
         } else {
             statusEl.className = 'validation-status invalid';
-            statusEl.textContent = '✕ Profile not found';
+            statusEl.innerHTML = '<span style="color:var(--red-violation);font-weight:bold;">✕</span>';
             inputEl.classList.add('invalid');
             inputEl.classList.remove('valid');
         }
     } catch (e) {
         statusEl.className = 'validation-status';
-        statusEl.textContent = 'Could not verify (network error)';
+        statusEl.innerHTML = '<span style="color:var(--text-tertiary);font-weight:bold;">✕</span>';
         inputEl.classList.remove('valid', 'invalid');
     }
 }

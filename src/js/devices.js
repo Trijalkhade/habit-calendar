@@ -111,27 +111,23 @@ async function addNewDevice() {
     const name = nameInput.value.trim() || 'Phone';
 
     if (!ip) {
-        status.textContent = 'Please enter the device IP address';
-        status.style.color = 'var(--red-violation)';
+        status.innerHTML = '<span style="color:var(--red-violation);font-weight:bold;">✕</span>';
         return;
     }
 
     btn.disabled = true;
     btn.textContent = 'Connecting...';
-    status.textContent = 'Trying to reach companion app...';
-    status.style.color = 'var(--text-tertiary)';
+    status.innerHTML = '<div class="spinner" style="width:14px;height:14px;border:2px solid var(--text-tertiary);border-top-color:var(--text-primary);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;"></div>';
 
     try {
         const deviceId = await invoke('add_device', { ip, name });
-        status.textContent = `✓ Connected! Device ID: ${deviceId}`;
-        status.style.color = 'var(--green-complete)';
+        status.innerHTML = '<span style="color:var(--green-complete);font-weight:bold;">✓</span>';
         btn.textContent = 'Connected ✓';
 
         // Refresh the devices list
         setTimeout(() => openDevicesPanel(), 1500);
     } catch (e) {
-        status.textContent = `✕ Connection failed: ${e}`;
-        status.style.color = 'var(--red-violation)';
+        status.innerHTML = '<span style="color:var(--red-violation);font-weight:bold;">✕</span>';
         btn.disabled = false;
         btn.textContent = 'Connect';
     }

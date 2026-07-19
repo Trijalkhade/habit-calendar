@@ -154,6 +154,41 @@ fn scan_single_browser(
     blacklist: &HashSet<String>,
     max_days: i32,
 ) -> Result<i32, Box<dyn std::error::Error + Send + Sync>> {
+    let is_firefox = browser == "firefox";
+
+    // Get the scan cursor (last processed visit timestamp) for incremental scanning
+    let cursor = {
+        let conn = db.lock().unwrap();
+        queries::get_scan_cursor(&conn, browser, profile)
+    };
+
+    // Optimization: Check file modification time before copying
+    if cursor > 0 {
+        if let Ok(metadata) = std::fs::metadata(history_path) {
+            if let Ok(mtime) = metadata.modified() {
+                // Convert cursor to SystemTime
+                let cursor_system_time = if is_firefox {
+                    std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_micros(cursor as u64)
+                } else {
+                    let unix_micros = (cursor as i64).saturating_sub(11644473600000000);
+                    if unix_micros > 0 {
+                        std::time::SystemTime::UNIX_EPOCH + std::time::Duration::from_micros(unix_micros as u64)
+                    } else {
+                        std::time::SystemTime::UNIX_EPOCH
+                    }
+                };
+
+                // Add a 1-minute buffer to avoid missing events written slightly after the DB file flush
+                let buffered_cursor = cursor_system_time.checked_sub(std::time::Duration::from_secs(60)).unwrap_or(cursor_system_time);
+
+                if mtime <= buffered_cursor {
+                    // File hasn't changed since our last cursor, skip heavy I/O
+                    return Ok(0);
+                }
+            }
+        }
+    }
+
     // Copy the database file to a temp location to avoid lock conflicts
     let temp_dir = std::env::temp_dir().join("habit-calendar-history");
     std::fs::create_dir_all(&temp_dir)?;
@@ -166,13 +201,7 @@ fn scan_single_browser(
         rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY,
     )?;
 
-    let is_firefox = browser == "firefox";
 
-    // Get the scan cursor (last processed visit timestamp) for incremental scanning
-    let cursor = {
-        let conn = db.lock().unwrap();
-        queries::get_scan_cursor(&conn, browser, profile)
-    };
 
     // Query only entries newer than our cursor for efficiency
     let query = if is_firefox {
