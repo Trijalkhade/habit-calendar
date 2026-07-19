@@ -94,7 +94,7 @@ export default function Index() {
           const response =
             'HTTP/1.1 200 OK\r\n' +
             'Content-Type: ' + contentType + '\r\n' +
-            'Content-Length: ' + Buffer.byteLength(responseBody) + '\r\n' +
+            'Content-Length: ' + responseBody.length + '\r\n' +
             'Connection: close\r\n' +
             '\r\n' +
             responseBody;
@@ -130,7 +130,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Habit Calendar Companion</Text>
+      <Text style={styles.title}>Habituator</Text>
       
       <View style={styles.card}>
         <Text style={styles.label}>Device IP Address:</Text>

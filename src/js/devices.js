@@ -63,7 +63,9 @@ function renderDevicesPanel(container, devices) {
         const empty = document.createElement('div');
         empty.className = 'devices-empty';
         empty.innerHTML = `
-            <div class="devices-empty-icon">📱</div>
+            <div class="devices-empty-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>
+            </div>
             <div class="devices-empty-text">
                 No devices connected yet.<br>
                 Add your Android or iOS phone below to sync browser history.
@@ -111,23 +113,23 @@ async function addNewDevice() {
     const name = nameInput.value.trim() || 'Phone';
 
     if (!ip) {
-        status.innerHTML = '<span style="color:var(--red-violation);font-weight:bold;">✕</span>';
+        status.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red-violation)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
         return;
     }
 
     btn.disabled = true;
     btn.textContent = 'Connecting...';
-    status.innerHTML = '<div class="spinner" style="width:14px;height:14px;border:2px solid var(--text-tertiary);border-top-color:var(--text-primary);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;"></div>';
+    status.innerHTML = '<div class="spinner" style="width:14px;height:14px;border:2px solid var(--text-tertiary);border-top-color:var(--text-primary);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;"></div>';
 
     try {
         const deviceId = await invoke('add_device', { ip, name });
-        status.innerHTML = '<span style="color:var(--green-complete);font-weight:bold;">✓</span>';
-        btn.textContent = 'Connected ✓';
+        status.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green-complete)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M20 6 9 17l-5-5"/></svg>';
+        btn.textContent = 'Connected';
 
         // Refresh the devices list
         setTimeout(() => openDevicesPanel(), 1500);
     } catch (e) {
-        status.innerHTML = '<span style="color:var(--red-violation);font-weight:bold;">✕</span>';
+        status.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--red-violation)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
         btn.disabled = false;
         btn.textContent = 'Connect';
     }
@@ -140,7 +142,7 @@ async function syncSingleDevice(deviceId, btnElement) {
 
     try {
         const result = await invoke('sync_device', { deviceId });
-        btnElement.textContent = 'Done ✓';
+        btnElement.textContent = 'Done';
         btnElement.style.color = 'var(--green-complete)';
         setTimeout(() => {
             btnElement.textContent = originalText;
@@ -172,9 +174,14 @@ async function removeDeviceConfirm(deviceId, deviceName) {
 
 function getDeviceIcon(name) {
     const lower = name.toLowerCase();
-    if (lower.includes('iphone') || lower.includes('ipad') || lower.includes('ios')) return '🍎';
-    if (lower.includes('pixel') || lower.includes('samsung') || lower.includes('android')) return '🤖';
-    return '📱';
+    
+    // Apple / iOS
+    if (lower.includes('iphone') || lower.includes('ipad') || lower.includes('ios')) {
+        return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;"><path d="M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z"/><path d="M10 2c1 .5 2 2 2 5"/></svg>';
+    }
+    
+    // Android / Generic Mobile
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>';
 }
 
 document.addEventListener('click', (e) => {

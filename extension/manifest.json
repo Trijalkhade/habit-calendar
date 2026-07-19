@@ -3,7 +3,7 @@
     "name": "Habit Calendar",
     "version": "1.0.0",
     "description": "Tracks coding habit completions and blacklisted site visits for Habit Calendar app",
-    "permissions": ["webNavigation", "storage"],
+    "permissions": ["webNavigation", "storage", "history"],
     "host_permissions": [
         "https://leetcode.com/*",
         "https://takeuforward.in/*",
@@ -24,6 +24,12 @@
             ],
             "js": ["content/takeuforward.js"],
             "run_at": "document_idle"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": ["content/inject.js"],
+            "matches": ["https://leetcode.com/*"]
         }
     ],
     "background": {

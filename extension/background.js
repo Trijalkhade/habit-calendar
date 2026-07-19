@@ -162,6 +162,23 @@ chrome.webNavigation.onCompleted.addListener((details) => {
     } catch (e) { /* invalid URL */ }
 });
 
+// Monitor history additions (catches iCloud / Chrome cloud-synced history from iPhone!)
+chrome.history.onVisited.addListener((historyItem) => {
+    try {
+        if (!historyItem.url) return;
+        const url = new URL(historyItem.url);
+        const domain = url.hostname.replace(/^www\./, '');
+
+        const isBlacklisted = blacklist.some(bl =>
+            domain === bl || domain.endsWith(`.${bl}`)
+        );
+
+        if (isBlacklisted) {
+            sendBlacklistVisit(domain, historyItem.url);
+        }
+    } catch (e) { /* invalid URL */ }
+});
+
 function getBrowserName() {
     const ua = navigator.userAgent;
     if (ua.includes('Brave')) return 'brave';

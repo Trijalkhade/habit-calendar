@@ -1,14 +1,18 @@
 {
   "expo": {
-    "name": "mobile-companion",
-    "slug": "mobile-companion",
+    "name": "Habituator",
+    "slug": "habituator",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "mobilecompanion",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.anonymous.mobilecompanion",
+      "infoPlist": {
+        "NSLocalNetworkUsageDescription": "Habit Calendar needs local network access to sync with your desktop app."
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +21,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.mobilecompanion"
     },
     "web": {
       "output": "static",

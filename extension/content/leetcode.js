@@ -99,27 +99,11 @@
 
     // Intercept GraphQL requests to catch submissions robustly
     const script = document.createElement('script');
-    script.textContent = `
-        const originalFetch = window.fetch;
-        window.fetch = async function(...args) {
-            const response = await originalFetch.apply(this, args);
-            try {
-                const url = typeof args[0] === 'string' ? args[0] : (args[0]?.url || '');
-                if (url.includes('graphql') || url.includes('submit')) {
-                    const clone = response.clone();
-                    clone.json().then(data => {
-                        // Check for successful submission response payload
-                        if (data && data.status_msg === 'Accepted' || (data.data && data.data.submissionDetails && data.data.submissionDetails.statusDisplay === 'Accepted')) {
-                            window.postMessage({ type: 'LC_SUBMISSION_ACCEPTED' }, '*');
-                        }
-                    }).catch(e => {});
-                }
-            } catch(e) {}
-            return response;
-        };
-    `;
-    document.documentElement.appendChild(script);
-    script.remove();
+    script.src = chrome.runtime.getURL('content/inject.js');
+    script.onload = function() {
+        this.remove();
+    };
+    (document.head || document.documentElement).appendChild(script);
 
     window.addEventListener('message', (event) => {
         if (event.source !== window || !event.data || event.data.type !== 'LC_SUBMISSION_ACCEPTED') return;
