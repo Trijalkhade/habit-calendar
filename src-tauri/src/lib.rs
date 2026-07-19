@@ -202,6 +202,16 @@ fn check_full_disk_access() -> bool {
     true // Non-macOS platforms don't need this check
 }
 
+#[tauri::command]
+fn open_privacy_settings() {
+    #[cfg(target_os = "macos")]
+    {
+        let _ = std::process::Command::new("open")
+            .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")
+            .spawn();
+    }
+}
+
 // ─── App State ───────────────────────────────────────────────────────────────
 
 pub struct AppState {
@@ -295,6 +305,7 @@ pub fn run() {
             sync_device,
             remove_device,
             check_full_disk_access,
+            open_privacy_settings,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

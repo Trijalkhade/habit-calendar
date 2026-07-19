@@ -40,5 +40,15 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/Trijalkhade/habit-calendar/releases/latest/download/updater.json"
+      ],
+      "dialog": true,
+      "pubkey": ""
+    }
   }
 }

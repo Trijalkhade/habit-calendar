@@ -349,11 +349,18 @@ function renderSettings(container, lcUsername, ccUsername, blacklist, diagnostic
                 <div class="settings-section-title" style="color: var(--red-violation);">⚠ Full Disk Access Required</div>
                 <div style="font-size: 12px; color: var(--text-secondary); line-height: 1.6;">
                     Habit Calendar needs Full Disk Access to scan browser history for blacklisted sites.<br>
-                    <strong>Go to:</strong> System Settings → Privacy & Security → Full Disk Access → Enable "Habit Calendar"<br>
+                    <button id="btn-open-settings" style="margin-top: 8px; margin-bottom: 8px; padding: 6px 12px; background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); border-radius: 4px; cursor: pointer;">Open System Settings</button><br>
                     <em>Alternative: If you prefer not to grant OS permissions, please install our Browser Extension to track history automatically.</em>
                 </div>
             `;
             container.insertBefore(fdaWarning, container.firstChild);
+            
+            const btnOpenSettings = fdaWarning.querySelector('#btn-open-settings');
+            if (btnOpenSettings) {
+                btnOpenSettings.addEventListener('click', async () => {
+                    await invoke('open_privacy_settings');
+                });
+            }
         }
     }).catch(() => {});
 
